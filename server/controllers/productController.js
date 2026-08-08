@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
-
+import cloudinary from "../config/cloudinary.js";
+import { Readable } from "stream";
 export const createProduct = async (req, res) => {
   try {
     const {
@@ -11,7 +12,6 @@ export const createProduct = async (req, res) => {
       category,
       sizes,
       colors,
-      images,
       stock,
       isFeatured,
     } = req.body;
@@ -24,13 +24,40 @@ export const createProduct = async (req, res) => {
       !category ||
       !sizes ||
       !colors ||
-      !stock == undefined
+      stock === undefined
     ) {
       return res.status(400).json({
         success: false,
         message: "Required fields are missing",
       });
     }
+
+    let imageUrls = [];
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const uploadResult = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "shoe-store/products",
+            },
+            (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            },
+          );
+
+          Readable.from(file.buffer).pipe(stream);
+        });
+
+        imageUrls.push(uploadResult.secure_url);
+      }
+    }
+
+    
     const product = await Product.create({
       name,
       brand,
@@ -38,20 +65,20 @@ export const createProduct = async (req, res) => {
       price,
       discountPrice,
       category,
-      sizes,
-      colors,
-      images,
+      sizes: typeof sizes === "string" ? JSON.parse(sizes) : sizes,
+      colors: typeof colors === "string" ? JSON.parse(colors) : colors,
+      images: imageUrls,
       stock,
       isFeatured,
     });
 
     res.status(201).json({
       success: true,
-      message: "Product create successfully",
+      message: "Product created successfully",
       product,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     res.status(500).json({
       success: false,
@@ -62,11 +89,11 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const { search, category, brand } = req.query;
+    const { search, category, brand, minPrice, maxPrice, sort } = req.query;
 
     const filter = {};
 
-    // Search by product name or brand
+    // Search
     if (search) {
       filter.$or = [
         {
@@ -84,19 +111,53 @@ export const getProducts = async (req, res) => {
       ];
     }
 
-    // Category filter
+    // Category
     if (category) {
       filter.category = category;
     }
 
-    // Brand filter
+    // Brand
     if (brand) {
       filter.brand = brand;
     }
 
-    const products = await Product.find(filter).sort({
+    // Price Filter
+    if (minPrice || maxPrice) {
+      filter.price = {};
+
+      if (minPrice) {
+        filter.price.$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        filter.price.$lte = Number(maxPrice);
+      }
+    }
+
+    // Sorting
+    let sortOption = {
       createdAt: -1,
-    });
+    };
+
+    if (sort === "price_asc") {
+      sortOption = {
+        price: 1,
+      };
+    }
+
+    if (sort === "price_desc") {
+      sortOption = {
+        price: -1,
+      };
+    }
+
+    if (sort === "newest") {
+      sortOption = {
+        createdAt: -1,
+      };
+    }
+
+    const products = await Product.find(filter).sort(sortOption);
 
     res.status(200).json({
       success: true,

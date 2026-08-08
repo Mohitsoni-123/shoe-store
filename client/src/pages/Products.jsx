@@ -12,6 +12,13 @@ function Products() {
   const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
 
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sort, setSort] = useState("");
+
+
+  const [initialLoading, setInitialLoading] = useState(true);
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -22,6 +29,9 @@ function Products() {
           search,
           category,
           brand,
+          minPrice,
+          maxPrice,
+          sort,
         },
       });
 
@@ -31,20 +41,24 @@ function Products() {
       setError("Failed to load products");
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
 
   useEffect(() => {
     fetchProducts();
-  }, [search, category, brand]);
+  }, [search, category, brand, minPrice, maxPrice, sort]);
 
   const clearFilters = () => {
-    setSearch("");
-    setCategory("");
-    setBrand("");
-  };
+  setSearch("");
+  setCategory("");
+  setBrand("");
+  setMinPrice("");
+  setMaxPrice("");
+  setSort("");
+};
 
-  if (loading) {
+  if (initialLoading) {
     return <h1>Loading products...</h1>;
   }
 
@@ -87,6 +101,32 @@ function Products() {
           <option value="Reebok">Reebok</option>
         </select>
       </div>
+
+      <div>
+        <input
+          type="number"
+          placeholder="Min Price"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Max Price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+        />
+      </div>
+
+      <select value={sort} onChange={(e) => setSort(e.target.value)}>
+        <option value="">Sort By</option>
+
+        <option value="price_asc">Price: Low to High</option>
+
+        <option value="price_desc">Price: High to Low</option>
+
+        <option value="newest">Newest</option>
+      </select>
 
       {/* Clear */}
       <div>

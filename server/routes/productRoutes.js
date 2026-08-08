@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middleware/authMiddleware.js";
+
 import {
   createProduct,
   getProducts,
@@ -8,18 +8,36 @@ import {
   deleteProduct,
 } from "../controllers/productController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
 import adminMiddleware from "../middleware/adminMiddleware.js";
+import upload from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, adminMiddleware, createProduct);
+router.post(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  upload.array("images", 5),
+  createProduct
+);
 
 router.get("/", getProducts);
 
 router.get("/:id", getProductById);
 
-router.put("/:id", authMiddleware, adminMiddleware, updateProduct);
+router.put(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  updateProduct
+);
 
-router.delete("/:id", authMiddleware, adminMiddleware, deleteProduct);
+router.delete(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  deleteProduct
+);
 
 export default router;
