@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import ProtectedRoute from "../components/ProtectedRoute";
+import Products from "../pages/Products";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,11 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/products" element={<Products />} />
+
+        <Route path="/products/:id" element={<ProductDetails />} />
+
+        
       </Routes>
     </BrowserRouter>
   );
