@@ -17,6 +17,9 @@ const Checkout = () => {
     pincode: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const total = items.reduce((sum, item) => {
     const price = Number(
       item.product?.discountPrice ?? item.product?.price ?? 0,
@@ -34,22 +37,58 @@ const Checkout = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("CHECKOUT DATA:", formData);
-    console.log("ORDER TOTAL:", total);
+    try {
+      setLoading(true);
+      setError("");
 
-    // Next step mein yahan Order API call karenge
-    alert("Checkout details saved");
+      const token = localStorage.getItem("token");
 
-    navigate("/orders");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/api/orders/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          paymentMethod: "COD",
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log("CREATE ORDER RESPONSE:", data);
+
+      if (!data.success) {
+        setError(data.message || "Failed to place order");
+        return;
+      }
+
+      alert("Order placed successfully!");
+
+      navigate("/orders");
+    } catch (error) {
+      console.error("CREATE ORDER ERROR:", error);
+
+      setError("Something went wrong while placing order");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (items.length === 0) {
     return (
       <div style={{ padding: "40px" }}>
         <h2>Your cart is empty</h2>
+
         <button onClick={() => navigate("/products")}>Continue Shopping</button>
       </div>
     );
@@ -59,6 +98,8 @@ const Checkout = () => {
     <div style={{ padding: "40px" }}>
       <h1>Checkout</h1>
 
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       <div
         style={{
           display: "flex",
@@ -66,7 +107,8 @@ const Checkout = () => {
           marginTop: "30px",
         }}
       >
-        {/* Shipping Address */}
+        {/* SHIPPING ADDRESS */}
+
         <div style={{ flex: 1 }}>
           <h2>Shipping Address</h2>
 
@@ -142,11 +184,14 @@ const Checkout = () => {
             <br />
             <br />
 
-            <button type="submit">Place Order</button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Placing Order..." : "Place Order"}
+            </button>
           </form>
         </div>
 
-        {/* Order Summary */}
+        {/* ORDER SUMMARY */}
+
         <div
           style={{
             flex: 1,
@@ -183,6 +228,10 @@ const Checkout = () => {
           })}
 
           <h2>Total: ₹{total}</h2>
+
+          <p>
+            Payment Method: <b>Cash on Delivery</b>
+          </p>
         </div>
       </div>
     </div>

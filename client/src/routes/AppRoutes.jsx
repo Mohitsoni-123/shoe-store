@@ -9,6 +9,7 @@ import Products from "../pages/Products";
 import ProductDetails from "../pages/ProductDetails";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
+import Orders from "../pages/Orders";
 
 const AppRoutes = () => {
   return (
@@ -35,12 +36,8 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
 
       <Route path="/checkout" element={<Checkout />} />
-
-
-      
+      <Route path="/orders" element={<Orders />} />
     </Routes>
-
-    
   );
 };
 
