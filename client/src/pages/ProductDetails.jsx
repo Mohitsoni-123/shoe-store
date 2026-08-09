@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 import api from "../services/api";
 
 function ProductDetails() {
@@ -12,6 +13,8 @@ function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -122,7 +125,20 @@ function ProductDetails() {
             : "Out of stock"}
         </p>
 
-        <button disabled={product.stock === 0}>Add to Cart 🛒</button>
+        <button
+          disabled={!selectedSize}
+          onClick={async () => {
+            const success = await addToCart(product._id, selectedSize, 1);
+
+            if (success) {
+              alert("Product added to cart");
+            } else {
+              alert("Failed to add product");
+            }
+          }}
+        >
+          Add to Cart
+        </button>
       </div>
     </div>
   );

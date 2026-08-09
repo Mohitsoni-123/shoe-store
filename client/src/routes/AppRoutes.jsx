@@ -9,7 +9,7 @@ import ProductDetails from "../pages/ProductDetails";
 
 const AppRoutes = () => {
   return (
-    <BrowserRouter>
+    // <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
@@ -28,7 +28,7 @@ const AppRoutes = () => {
 
         <Route path="/products/:id" element={<ProductDetails />} />
       </Routes>
-    </BrowserRouter>
+    // </BrowserRouter>
   );
 };
 
