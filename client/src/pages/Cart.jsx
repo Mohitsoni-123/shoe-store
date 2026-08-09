@@ -1,8 +1,10 @@
 import React from "react";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const { cart, updateCartItem, removeFromCart } = useCart();
+  const navigate = useNavigate();
 
   const items = cart?.items || [];
 
@@ -129,6 +131,10 @@ const Cart = () => {
           <hr />
 
           <h2>Total: ₹{total}</h2>
+
+          <button type="button" onClick={() => navigate("/checkout")}>
+            Proceed to Checkout
+          </button>
         </>
       )}
     </div>
