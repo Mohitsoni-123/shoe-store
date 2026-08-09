@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const CartContext = createContext();
+const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({
@@ -9,26 +9,31 @@ export const CartProvider = ({ children }) => {
 
   const token = localStorage.getItem("token");
 
+  // =========================
+  // FETCH CART
+  // =========================
   const fetchCart = async () => {
     try {
-      if (!token) return;
+      if (!token) {
+        setCart({ items: [] });
+        return;
+      }
 
-      const response = await fetch(
-        "http://localhost:5000/api/cart",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/cart", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
+
+      console.log("FETCH CART RESPONSE:", data);
 
       if (data.success) {
         setCart(data.cart);
       }
     } catch (error) {
-      console.error("Failed to fetch cart:", error);
+      console.error("FETCH CART ERROR:", error);
     }
   };
 
@@ -36,6 +41,9 @@ export const CartProvider = ({ children }) => {
     fetchCart();
   }, []);
 
+  // =========================
+  // ADD TO CART
+  // =========================
   const addToCart = async (productId, size, quantity = 1) => {
     try {
       const response = await fetch(
@@ -56,6 +64,8 @@ export const CartProvider = ({ children }) => {
 
       const data = await response.json();
 
+      console.log("ADD TO CART RESPONSE:", data);
+
       if (data.success) {
         setCart(data.cart);
         return true;
@@ -63,17 +73,26 @@ export const CartProvider = ({ children }) => {
 
       return false;
     } catch (error) {
-      console.error("Failed to add to cart:", error);
+      console.error("ADD TO CART ERROR:", error);
       return false;
     }
   };
 
+  // =========================
+  // UPDATE CART ITEM
+  // =========================
   const updateCartItem = async (
     productId,
     size,
     quantity
   ) => {
     try {
+      console.log("UPDATE REQUEST:", {
+        productId,
+        size,
+        quantity,
+      });
+
       const response = await fetch(
         "http://localhost:5000/api/cart/update",
         {
@@ -92,16 +111,30 @@ export const CartProvider = ({ children }) => {
 
       const data = await response.json();
 
+      console.log("UPDATE RESPONSE:", data);
+
       if (data.success) {
         setCart(data.cart);
+        return true;
       }
+
+      return false;
     } catch (error) {
-      console.error("Failed to update cart:", error);
+      console.error("UPDATE CART ERROR:", error);
+      return false;
     }
   };
 
+  // =========================
+  // REMOVE FROM CART
+  // =========================
   const removeFromCart = async (productId, size) => {
     try {
+      console.log("REMOVE REQUEST:", {
+        productId,
+        size,
+      });
+
       const response = await fetch(
         "http://localhost:5000/api/cart/remove",
         {
@@ -119,17 +152,23 @@ export const CartProvider = ({ children }) => {
 
       const data = await response.json();
 
+      console.log("REMOVE RESPONSE:", data);
+
       if (data.success) {
         setCart(data.cart);
+        return true;
       }
+
+      return false;
     } catch (error) {
-      console.error(
-        "Failed to remove from cart:",
-        error
-      );
+      console.error("REMOVE CART ERROR:", error);
+      return false;
     }
   };
 
+  // =========================
+  // CONTEXT
+  // =========================
   return (
     <CartContext.Provider
       value={{
@@ -145,6 +184,7 @@ export const CartProvider = ({ children }) => {
   );
 };
 
+// IMPORTANT
 export const useCart = () => {
   return useContext(CartContext);
 };

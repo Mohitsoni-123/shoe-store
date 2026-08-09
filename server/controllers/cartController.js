@@ -30,9 +30,7 @@ export const addToCart = async (req, res) => {
     } else {
       // Check if same product + same size already exists
       const existingItem = cart.items.find(
-        (item) =>
-          item.product.toString() === productId &&
-          item.size === size
+        (item) => item.product.toString() === productId && item.size === size,
       );
 
       if (existingItem) {
@@ -120,8 +118,8 @@ export const updateCartItem = async (req, res) => {
 
     const item = cart.items.find(
       (item) =>
-        item.product.toString() === productId &&
-        item.size === size
+        item.product.toString() === String(productId) &&
+        String(item.size) === String(size),
     );
 
     if (!item) {
@@ -135,9 +133,9 @@ export const updateCartItem = async (req, res) => {
       cart.items = cart.items.filter(
         (item) =>
           !(
-            item.product.toString() === productId &&
-            item.size === size
-          )
+            item.product.toString() === String(productId) &&
+            String(item.size) === String(size)
+          ),
       );
     } else {
       item.quantity = Number(quantity);
@@ -164,7 +162,6 @@ export const updateCartItem = async (req, res) => {
   }
 };
 
-
 export const removeFromCart = async (req, res) => {
   try {
     const { productId, size } = req.body;
@@ -189,8 +186,8 @@ export const removeFromCart = async (req, res) => {
 
     const itemExists = cart.items.some(
       (item) =>
-        item.product.toString() === productId &&
-        item.size === size
+        item.product.toString() === String(productId) &&
+        String(item.size) === String(size),
     );
 
     if (!itemExists) {
@@ -203,9 +200,9 @@ export const removeFromCart = async (req, res) => {
     cart.items = cart.items.filter(
       (item) =>
         !(
-          item.product.toString() === productId &&
-          item.size === size
-        )
+          item.product.toString() === String(productId) &&
+          String(item.size) === String(size)
+        ),
     );
 
     await cart.save();
