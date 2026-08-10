@@ -1,15 +1,26 @@
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const { cart } = useCart();
+  const navigate = useNavigate();
 
-  console.log("NAVBAR CART:", cart);
+  const token = localStorage.getItem("token");
 
   const cartCount =
-    cart?.items?.reduce((total, item) => {
-      return total + Number(item.quantity || 1);
-    }, 0) || 0;
+    cart?.items?.reduce(
+      (total, item) => total + Number(item.quantity || 0),
+      0,
+    ) || 0;
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/login");
+
+    window.location.reload();
+  };
 
   return (
     <nav
@@ -22,6 +33,7 @@ const Navbar = () => {
       }}
     >
       {/* Logo */}
+
       <Link
         to="/"
         style={{
@@ -35,21 +47,33 @@ const Navbar = () => {
       </Link>
 
       {/* Navigation */}
+
       <div
         style={{
           display: "flex",
+          alignItems: "center",
           gap: "25px",
         }}
       >
         <Link to="/">Home</Link>
 
-        <Link to="/products">
-          Products
-        </Link>
+        <Link to="/products">Products</Link>
 
-        <Link to="/cart">
-          🛒 Cart ({cartCount})
-        </Link>
+        <Link to="/cart">🛒 Cart ({cartCount})</Link>
+
+        {token && <Link to="/orders">My Orders</Link>}
+
+        {!token ? (
+          <>
+            <Link to="/login">Login</Link>
+
+            <Link to="/register">Register</Link>
+          </>
+        ) : (
+          <button type="button" onClick={handleLogout}>
+            Logout
+          </button>
+        )}
       </div>
     </nav>
   );

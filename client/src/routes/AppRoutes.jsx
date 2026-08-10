@@ -10,6 +10,8 @@ import ProductDetails from "../pages/ProductDetails";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
+import AdminDashboard from "../pages/AdminDashboard";
+import AdminRoute from "../components/AdminRoute";
 
 const AppRoutes = () => {
   return (
@@ -37,6 +39,15 @@ const AppRoutes = () => {
 
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/orders" element={<Orders />} />
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        }
+      />
     </Routes>
   );
 };

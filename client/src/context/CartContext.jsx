@@ -1,25 +1,31 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-const CartContext = createContext(null);
+const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({
     items: [],
   });
 
-  const token = localStorage.getItem("token");
+  // Always get latest token
+  const getToken = () => {
+    return localStorage.getItem("token");
+  };
 
   // =========================
   // FETCH CART
   // =========================
   const fetchCart = async () => {
     try {
+      const token = getToken();
+
       if (!token) {
         setCart({ items: [] });
         return;
       }
 
       const response = await fetch("http://localhost:5000/api/cart", {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,36 +37,39 @@ export const CartProvider = ({ children }) => {
 
       if (data.success) {
         setCart(data.cart);
+      } else {
+        setCart({ items: [] });
       }
     } catch (error) {
       console.error("FETCH CART ERROR:", error);
+      setCart({ items: [] });
     }
   };
-
-  useEffect(() => {
-    fetchCart();
-  }, []);
 
   // =========================
   // ADD TO CART
   // =========================
   const addToCart = async (productId, size, quantity = 1) => {
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/cart/add",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            productId,
-            size,
-            quantity,
-          }),
-        }
-      );
+      const token = getToken();
+
+      if (!token) {
+        console.error("No token found");
+        return false;
+      }
+
+      const response = await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId,
+          size,
+          quantity,
+        }),
+      });
 
       const data = await response.json();
 
@@ -79,39 +88,33 @@ export const CartProvider = ({ children }) => {
   };
 
   // =========================
-  // UPDATE CART ITEM
+  // UPDATE CART
   // =========================
-  const updateCartItem = async (
-    productId,
-    size,
-    quantity
-  ) => {
+  const updateCartItem = async (productId, size, quantity) => {
     try {
-      console.log("UPDATE REQUEST:", {
-        productId,
-        size,
-        quantity,
-      });
+      const token = getToken();
 
-      const response = await fetch(
-        "http://localhost:5000/api/cart/update",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            productId,
-            size,
-            quantity,
-          }),
-        }
-      );
+      if (!token) {
+        console.error("No token found");
+        return false;
+      }
+
+      const response = await fetch("http://localhost:5000/api/cart/update", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId,
+          size,
+          quantity,
+        }),
+      });
 
       const data = await response.json();
 
-      console.log("UPDATE RESPONSE:", data);
+      console.log("UPDATE CART RESPONSE:", data);
 
       if (data.success) {
         setCart(data.cart);
@@ -130,29 +133,28 @@ export const CartProvider = ({ children }) => {
   // =========================
   const removeFromCart = async (productId, size) => {
     try {
-      console.log("REMOVE REQUEST:", {
-        productId,
-        size,
-      });
+      const token = getToken();
 
-      const response = await fetch(
-        "http://localhost:5000/api/cart/remove",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            productId,
-            size,
-          }),
-        }
-      );
+      if (!token) {
+        console.error("No token found");
+        return false;
+      }
+
+      const response = await fetch("http://localhost:5000/api/cart/remove", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId,
+          size,
+        }),
+      });
 
       const data = await response.json();
 
-      console.log("REMOVE RESPONSE:", data);
+      console.log("REMOVE CART RESPONSE:", data);
 
       if (data.success) {
         setCart(data.cart);
@@ -167,8 +169,29 @@ export const CartProvider = ({ children }) => {
   };
 
   // =========================
-  // CONTEXT
+  // INITIAL CART
   // =========================
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  // =========================
+  // LOGIN / LOGOUT LISTENER
+  // =========================
+  useEffect(() => {
+    const handleAuthChange = () => {
+      console.log("AUTH CHANGED - FETCHING CART");
+
+      fetchCart();
+    };
+
+    window.addEventListener("authChanged", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("authChanged", handleAuthChange);
+    };
+  }, []);
+
   return (
     <CartContext.Provider
       value={{
@@ -184,7 +207,6 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// IMPORTANT
 export const useCart = () => {
   return useContext(CartContext);
 };

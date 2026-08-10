@@ -8,6 +8,11 @@ const Orders = () => {
     try {
       const token = localStorage.getItem("token");
 
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
       const response = await fetch(
         "http://localhost:5000/api/orders/my-orders",
         {
@@ -17,9 +22,13 @@ const Orders = () => {
         },
       );
 
-      const data = await response.json();
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return;
+      }
 
-      console.log("MY ORDERS RESPONSE:", data);
+      const data = await response.json();
 
       if (data.success) {
         setOrders(data.orders);
