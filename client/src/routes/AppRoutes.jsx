@@ -14,6 +14,7 @@ import AdminDashboard from "../pages/AdminDashboard";
 import AdminRoute from "../components/AdminRoute";
 import AdminProducts from "../pages/AdminProducts";
 import AdminAddProduct from "../pages/AdminAddProduct";
+import AdminEditProduct from "../pages/AdminEditProduct";
 
 
 const AppRoutes = () => {
@@ -69,6 +70,17 @@ const AppRoutes = () => {
     </AdminRoute>
   }
 />
+
+<Route
+  path="/admin/products/edit/:id"
+  element={
+    <ProtectedRoute>
+      <AdminEditProduct />
+    </ProtectedRoute>
+  }
+/>
+
+
 
 
 
