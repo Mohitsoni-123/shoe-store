@@ -12,6 +12,9 @@ import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminRoute from "../components/AdminRoute";
+import AdminProducts from "../pages/AdminProducts";
+import AdminAddProduct from "../pages/AdminAddProduct";
+
 
 const AppRoutes = () => {
   return (
@@ -48,6 +51,28 @@ const AppRoutes = () => {
           </AdminRoute>
         }
       />
+
+      <Route
+  path="/admin/products"
+  element={
+    <AdminRoute>
+      <AdminProducts />
+    </AdminRoute>
+  }
+/>
+
+<Route
+  path="/admin/products/add"
+  element={
+    <AdminRoute>
+      <AdminAddProduct />
+    </AdminRoute>
+  }
+/>
+
+
+
+
     </Routes>
   );
 };
