@@ -10,36 +10,65 @@ const Cart = () => {
 
   // Increase quantity
   const increaseQuantity = async (item) => {
+    if (!item.product) return;
+
     const currentQuantity = Number(item.quantity || 1);
 
-    await updateCartItem(item.product._id, item.size, currentQuantity + 1);
+    await updateCartItem(
+      item.product._id,
+      item.size,
+      currentQuantity + 1
+    );
   };
 
   // Decrease quantity
   const decreaseQuantity = async (item) => {
+    if (!item.product) return;
+
     const currentQuantity = Number(item.quantity || 1);
     const newQuantity = currentQuantity - 1;
 
     if (newQuantity <= 0) {
-      await removeFromCart(item.product._id, item.size);
+      await removeFromCart(
+        item.product._id,
+        item.size
+      );
       return;
     }
 
-    await updateCartItem(item.product._id, item.size, newQuantity);
+    await updateCartItem(
+      item.product._id,
+      item.size,
+      newQuantity
+    );
   };
 
   // Remove item
   const removeItem = async (item) => {
-    await removeFromCart(item.product._id, item.size);
+    if (!item.product) return;
+
+    await removeFromCart(
+      item.product._id,
+      item.size
+    );
   };
 
+  // Only valid products
+  const validItems = items.filter(
+    (item) => item.product
+  );
+
   // Calculate total
-  const total = items.reduce((sum, item) => {
+  const total = validItems.reduce((sum, item) => {
     const price = Number(
-      item.product?.discountPrice ?? item.product?.price ?? 0,
+      item.product?.discountPrice ??
+        item.product?.price ??
+        0
     );
 
-    const quantity = Number(item.quantity || 0);
+    const quantity = Number(
+      item.quantity || 0
+    );
 
     return sum + price * quantity;
   }, 0);
@@ -55,17 +84,21 @@ const Cart = () => {
       <h1>Your Cart</h1>
 
       {/* Empty Cart */}
-      {items.length === 0 ? (
+      {validItems.length === 0 ? (
         <h3>Your cart is empty</h3>
       ) : (
         <>
           {/* Cart Items */}
-          {items.map((item) => {
+          {validItems.map((item) => {
             const price = Number(
-              item.product?.discountPrice ?? item.product?.price ?? 0,
+              item.product?.discountPrice ??
+                item.product?.price ??
+                0
             );
 
-            const quantity = Number(item.quantity || 1);
+            const quantity = Number(
+              item.quantity || 1
+            );
 
             return (
               <div
@@ -77,13 +110,21 @@ const Cart = () => {
                   borderRadius: "8px",
                 }}
               >
-                <h2>{item.product?.name}</h2>
+                <h2>
+                  {item.product?.name}
+                </h2>
 
-                <p>Price: ₹{price}</p>
+                <p>
+                  Price: ₹{price}
+                </p>
 
-                <p>Size: {item.size}</p>
+                <p>
+                  Size: {item.size}
+                </p>
 
-                <p>Quantity: {quantity}</p>
+                <p>
+                  Quantity: {quantity}
+                </p>
 
                 {/* Quantity Controls */}
                 <div
@@ -93,7 +134,12 @@ const Cart = () => {
                     alignItems: "center",
                   }}
                 >
-                  <button type="button" onClick={() => decreaseQuantity(item)}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      decreaseQuantity(item)
+                    }
+                  >
                     -
                   </button>
 
@@ -107,7 +153,12 @@ const Cart = () => {
                     {quantity}
                   </span>
 
-                  <button type="button" onClick={() => increaseQuantity(item)}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      increaseQuantity(item)
+                    }
+                  >
                     +
                   </button>
                 </div>
@@ -115,7 +166,9 @@ const Cart = () => {
                 {/* Remove */}
                 <button
                   type="button"
-                  onClick={() => removeItem(item)}
+                  onClick={() =>
+                    removeItem(item)
+                  }
                   style={{
                     marginTop: "15px",
                     color: "red",
@@ -130,9 +183,16 @@ const Cart = () => {
           {/* Total */}
           <hr />
 
-          <h2>Total: ₹{total}</h2>
+          <h2>
+            Total: ₹{total}
+          </h2>
 
-          <button type="button" onClick={() => navigate("/checkout")}>
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/checkout")
+            }
+          >
             Proceed to Checkout
           </button>
         </>

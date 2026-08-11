@@ -15,7 +15,9 @@ import AdminRoute from "../components/AdminRoute";
 import AdminProducts from "../pages/AdminProducts";
 import AdminAddProduct from "../pages/AdminAddProduct";
 import AdminEditProduct from "../pages/AdminEditProduct";
+import AdminOrders from "../pages/AdminOrders";
 
+import AdminUsers from "../pages/AdminUsers";
 
 const AppRoutes = () => {
   return (
@@ -54,37 +56,42 @@ const AppRoutes = () => {
       />
 
       <Route
-  path="/admin/products"
-  element={
-    <AdminRoute>
-      <AdminProducts />
-    </AdminRoute>
-  }
-/>
+        path="/admin/products"
+        element={
+          <AdminRoute>
+            <AdminProducts />
+          </AdminRoute>
+        }
+      />
 
-<Route
-  path="/admin/products/add"
-  element={
-    <AdminRoute>
-      <AdminAddProduct />
-    </AdminRoute>
-  }
-/>
+      <Route
+        path="/admin/products/add"
+        element={
+          <AdminRoute>
+            <AdminAddProduct />
+          </AdminRoute>
+        }
+      />
 
-<Route
-  path="/admin/products/edit/:id"
-  element={
-    <ProtectedRoute>
-      <AdminEditProduct />
-    </ProtectedRoute>
-  }
-/>
+      <Route
+        path="/admin/products/edit/:id"
+        element={
+          <ProtectedRoute>
+            <AdminEditProduct />
+          </ProtectedRoute>
+        }
+      />
 
+      <Route path="/admin/orders" element={<AdminOrders />} />
 
-
-
-
-
+      <Route
+        path="/admin/users"
+        element={
+          <AdminRoute>
+            <AdminUsers />
+          </AdminRoute>
+        }
+      />
     </Routes>
   );
 };

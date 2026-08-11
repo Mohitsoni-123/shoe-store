@@ -137,3 +137,80 @@ export const getMyOrders = async (req, res) => {
     });
   }
 };
+
+
+export const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email")
+      .populate("items.product", "name price discountPrice image")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    console.error("GET ALL ORDERS ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+    });
+  }
+};
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const allowedStatuses = [
+      "Pending",
+      "Confirmed",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+    ];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order status",
+      });
+    }
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    order.status = status;
+
+    await order.save();
+
+    const updatedOrder = await Order.findById(id)
+      .populate("user", "name email")
+      .populate(
+        "items.product",
+        "name price discountPrice image"
+      );
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error("UPDATE ORDER STATUS ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order status",
+    });
+  }
+};
