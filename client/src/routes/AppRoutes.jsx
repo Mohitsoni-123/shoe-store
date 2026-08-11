@@ -18,6 +18,7 @@ import AdminEditProduct from "../pages/AdminEditProduct";
 import AdminOrders from "../pages/AdminOrders";
 
 import AdminUsers from "../pages/AdminUsers";
+import AdminOrderDetails from "../pages/AdminOrderDetails";
 
 const AppRoutes = () => {
   return (
@@ -92,6 +93,15 @@ const AppRoutes = () => {
           </AdminRoute>
         }
       />
+
+      <Route
+  path="/admin/orders/:id"
+  element={
+    <AdminRoute>
+      <AdminOrderDetails />
+    </AdminRoute>
+  }
+/>
     </Routes>
   );
 };

@@ -193,6 +193,15 @@ const AdminDashboard = () => {
                   ? new Date(order.createdAt).toLocaleDateString()
                   : "N/A"}
               </p>
+
+              <button
+                onClick={() => navigate(`/admin/orders/${order._id}`)}
+                style={{
+                  marginTop: "10px",
+                }}
+              >
+                View Details
+              </button>
             </div>
           ))}
         </div>
@@ -208,17 +217,17 @@ const AdminDashboard = () => {
         </button>
 
         <button
-          onClick={() => navigate("/admin/orders")}
-          style={{ marginRight: "15px" }}
-        >
-          Manage Orders
-        </button>
-
-        <button
           onClick={() => navigate("/admin/users")}
           style={{ marginRight: "15px" }}
         >
           Manage Users
+        </button>
+
+        <button
+          onClick={() => navigate("/admin/orders")}
+          style={{ marginRight: "15px" }}
+        >
+          Manage Orders
         </button>
 
         <button onClick={handleLogout}>Logout</button>
