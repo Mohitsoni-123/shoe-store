@@ -1,33 +1,71 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
+// =========================
+// AUTH / USER PAGES
+// =========================
+
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+
+// =========================
+// ROUTE PROTECTION
+// =========================
+
 import ProtectedRoute from "../components/ProtectedRoute";
+import AdminRoute from "../components/AdminRoute";
+
+// =========================
+// USER PAGES
+// =========================
+
 import Products from "../pages/Products";
 import ProductDetails from "../pages/ProductDetails";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Orders from "../pages/Orders";
+
+// =========================
+// ADMIN PAGES
+// =========================
+
 import AdminDashboard from "../pages/AdminDashboard";
-import AdminRoute from "../components/AdminRoute";
 import AdminProducts from "../pages/AdminProducts";
 import AdminAddProduct from "../pages/AdminAddProduct";
 import AdminEditProduct from "../pages/AdminEditProduct";
 import AdminOrders from "../pages/AdminOrders";
-
 import AdminUsers from "../pages/AdminUsers";
 import AdminOrderDetails from "../pages/AdminOrderDetails";
+
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
 
-      <Route path="/login" element={<Login />} />
+      {/* =========================
+          PUBLIC ROUTES
+      ========================= */}
 
-      <Route path="/register" element={<Register />} />
+      <Route
+        path="/"
+        element={<Login />}
+      />
+
+      <Route
+        path="/login"
+        element={<Login />}
+      />
+
+      <Route
+        path="/register"
+        element={<Register />}
+      />
+
+
+      {/* =========================
+          USER ROUTES
+      ========================= */}
 
       <Route
         path="/dashboard"
@@ -38,14 +76,35 @@ const AppRoutes = () => {
         }
       />
 
-      <Route path="/products" element={<Products />} />
+      <Route
+        path="/products"
+        element={<Products />}
+      />
 
-      <Route path="/products/:id" element={<ProductDetails />} />
+      <Route
+        path="/products/:id"
+        element={<ProductDetails />}
+      />
 
-      <Route path="/cart" element={<Cart />} />
+      <Route
+        path="/cart"
+        element={<Cart />}
+      />
 
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/orders" element={<Orders />} />
+      <Route
+        path="/checkout"
+        element={<Checkout />}
+      />
+
+      <Route
+        path="/orders"
+        element={<Orders />}
+      />
+
+
+      {/* =========================
+          ADMIN DASHBOARD
+      ========================= */}
 
       <Route
         path="/admin"
@@ -56,6 +115,11 @@ const AppRoutes = () => {
         }
       />
 
+
+      {/* =========================
+          ADMIN PRODUCTS
+      ========================= */}
+
       <Route
         path="/admin/products"
         element={
@@ -64,6 +128,8 @@ const AppRoutes = () => {
           </AdminRoute>
         }
       />
+
+      {/* Add Product */}
 
       <Route
         path="/admin/products/add"
@@ -74,16 +140,46 @@ const AppRoutes = () => {
         }
       />
 
+      {/* Edit Product */}
+
       <Route
         path="/admin/products/edit/:id"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <AdminEditProduct />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 
-      <Route path="/admin/orders" element={<AdminOrders />} />
+
+      {/* =========================
+          ADMIN ORDERS
+      ========================= */}
+
+      <Route
+        path="/admin/orders"
+        element={
+          <AdminRoute>
+            <AdminOrders />
+          </AdminRoute>
+        }
+      />
+
+      {/* Order Details */}
+
+      <Route
+        path="/admin/orders/:id"
+        element={
+          <AdminRoute>
+            <AdminOrderDetails />
+          </AdminRoute>
+        }
+      />
+
+
+      {/* =========================
+          ADMIN USERS
+      ========================= */}
 
       <Route
         path="/admin/users"
@@ -94,16 +190,9 @@ const AppRoutes = () => {
         }
       />
 
-      <Route
-  path="/admin/orders/:id"
-  element={
-    <AdminRoute>
-      <AdminOrderDetails />
-    </AdminRoute>
-  }
-/>
     </Routes>
   );
 };
+
 
 export default AppRoutes;

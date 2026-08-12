@@ -9,6 +9,7 @@ const AdminOrderDetails = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // =========================
   // FETCH ORDER DETAILS
@@ -19,28 +20,19 @@ const AdminOrderDetails = () => {
       setLoading(true);
       setError("");
 
-      const response = await api.get(
-        `/admin/orders/${id}`
-      );
+      const response = await api.get(`/admin/orders/${id}`);
 
-      console.log(
-        "ORDER DETAILS RESPONSE:",
-        response.data
-      );
+      console.log("ORDER DETAILS RESPONSE:", response.data);
 
       if (response.data.success) {
         setOrder(response.data.order);
+      } else {
+        setError(response.data.message || "Failed to load order details");
       }
     } catch (error) {
-      console.error(
-        "GET ORDER DETAILS ERROR:",
-        error
-      );
+      console.error("GET ORDER DETAILS ERROR:", error);
 
-      setError(
-        error.response?.data?.message ||
-          "Failed to load order details"
-      );
+      setError(error.response?.data?.message || "Failed to load order details");
     } finally {
       setLoading(false);
     }
@@ -49,6 +41,39 @@ const AdminOrderDetails = () => {
   useEffect(() => {
     fetchOrder();
   }, [id]);
+
+  // =========================
+  // UPDATE ORDER STATUS
+  // =========================
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      setUpdatingStatus(true);
+
+      const response = await api.put(`/admin/orders/${id}/status`, {
+        status: newStatus,
+      });
+
+      console.log("UPDATE ORDER STATUS RESPONSE:", response.data);
+
+      if (response.data.success) {
+        setOrder((prevOrder) => ({
+          ...prevOrder,
+          status: newStatus,
+        }));
+
+        alert("Order status updated successfully");
+      } else {
+        alert(response.data.message || "Failed to update order status");
+      }
+    } catch (error) {
+      console.error("UPDATE ORDER STATUS ERROR:", error);
+
+      alert(error.response?.data?.message || "Failed to update order status");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   // =========================
   // LOADING
@@ -69,31 +94,25 @@ const AdminOrderDetails = () => {
   if (error) {
     return (
       <div style={{ padding: "40px" }}>
-        <h2 style={{ color: "red" }}>
-          {error}
-        </h2>
+        <h2 style={{ color: "red" }}>{error}</h2>
 
-        <button
-          onClick={() =>
-            navigate("/admin/orders")
-          }
-        >
+        <button onClick={() => navigate("/admin/orders")}>
           Back to Orders
         </button>
       </div>
     );
   }
 
+  // =========================
+  // ORDER NOT FOUND
+  // =========================
+
   if (!order) {
     return (
       <div style={{ padding: "40px" }}>
         <h2>Order not found</h2>
 
-        <button
-          onClick={() =>
-            navigate("/admin/orders")
-          }
-        >
+        <button onClick={() => navigate("/admin/orders")}>
           Back to Orders
         </button>
       </div>
@@ -104,9 +123,11 @@ const AdminOrderDetails = () => {
   // TOTAL
   // =========================
 
-  const totalAmount = Number(
-    order.totalAmount || 0
-  );
+  const totalAmount = Number(order.totalAmount || 0);
+
+  // =========================
+  // UI
+  // =========================
 
   return (
     <div
@@ -116,25 +137,24 @@ const AdminOrderDetails = () => {
         margin: "0 auto",
       }}
     >
-      {/* HEADER */}
+      {/* =========================
+          HEADER
+      ========================= */}
 
       <h1>Order Details</h1>
 
       <p>
-        <strong>Order ID:</strong>{" "}
-        {order._id}
+        <strong>Order ID:</strong> {order._id}
       </p>
 
       <p>
         <strong>Order Date:</strong>{" "}
-        {order.createdAt
-          ? new Date(
-              order.createdAt
-            ).toLocaleString()
-          : "N/A"}
+        {order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}
       </p>
 
-      {/* CUSTOMER */}
+      {/* =========================
+          CUSTOMER INFORMATION
+      ========================= */}
 
       <div
         style={{
@@ -147,17 +167,17 @@ const AdminOrderDetails = () => {
         <h2>Customer Information</h2>
 
         <p>
-          <strong>Name:</strong>{" "}
-          {order.user?.name || "Unknown"}
+          <strong>Name:</strong> {order.user?.name || "Unknown"}
         </p>
 
         <p>
-          <strong>Email:</strong>{" "}
-          {order.user?.email || "N/A"}
+          <strong>Email:</strong> {order.user?.email || "N/A"}
         </p>
       </div>
 
-      {/* SHIPPING ADDRESS */}
+      {/* =========================
+          SHIPPING ADDRESS
+      ========================= */}
 
       <div
         style={{
@@ -172,43 +192,38 @@ const AdminOrderDetails = () => {
         {order.shippingAddress ? (
           <>
             <p>
-              <strong>Name:</strong>{" "}
-              {order.shippingAddress.name}
+              <strong>Name:</strong> {order.shippingAddress.name || "N/A"}
             </p>
 
             <p>
-              <strong>Phone:</strong>{" "}
-              {order.shippingAddress.phone}
+              <strong>Phone:</strong> {order.shippingAddress.phone || "N/A"}
             </p>
 
             <p>
-              <strong>Address:</strong>{" "}
-              {order.shippingAddress.address}
+              <strong>Address:</strong> {order.shippingAddress.address || "N/A"}
             </p>
 
             <p>
-              <strong>City:</strong>{" "}
-              {order.shippingAddress.city}
+              <strong>City:</strong> {order.shippingAddress.city || "N/A"}
             </p>
 
             <p>
-              <strong>State:</strong>{" "}
-              {order.shippingAddress.state}
+              <strong>State:</strong> {order.shippingAddress.state || "N/A"}
             </p>
 
             <p>
               <strong>PIN Code:</strong>{" "}
-              {order.shippingAddress.pincode}
+              {order.shippingAddress.pincode || "N/A"}
             </p>
           </>
         ) : (
-          <p>
-            Shipping address not available.
-          </p>
+          <p>Shipping address not available.</p>
         )}
       </div>
 
-      {/* PRODUCTS */}
+      {/* =========================
+          ORDER ITEMS
+      ========================= */}
 
       <div
         style={{
@@ -220,35 +235,28 @@ const AdminOrderDetails = () => {
       >
         <h2>Order Items</h2>
 
-        {order.items?.length === 0 ? (
+        {!order.items || order.items.length === 0 ? (
           <p>No products found.</p>
         ) : (
-          order.items?.map((item, index) => {
+          order.items.map((item, index) => {
             const price = Number(
-              item.price ||
-                item.product?.discountPrice ||
-                item.product?.price ||
-                0
+              item.price ??
+                item.product?.discountPrice ??
+                item.product?.price ??
+                0,
             );
 
-            const quantity = Number(
-              item.quantity || 1
-            );
+            const quantity = Number(item.quantity || 1);
 
             return (
               <div
-                key={
-                  item._id || index
-                }
+                key={item._id || index}
                 style={{
-                  borderBottom:
-                    "1px solid #eee",
-                  padding:
-                    "15px 0",
+                  borderBottom: "1px solid #eee",
+                  padding: "15px 0",
                   display: "flex",
                   gap: "20px",
-                  alignItems:
-                    "center",
+                  alignItems: "center",
                 }}
               >
                 {/* PRODUCT IMAGE */}
@@ -256,17 +264,12 @@ const AdminOrderDetails = () => {
                 {item.product?.image && (
                   <img
                     src={item.product.image}
-                    alt={
-                      item.product?.name ||
-                      "Product"
-                    }
+                    alt={item.product?.name || "Product"}
                     style={{
                       width: "100px",
                       height: "100px",
-                      objectFit:
-                        "cover",
-                      borderRadius:
-                        "8px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
                     }}
                   />
                 )}
@@ -274,41 +277,22 @@ const AdminOrderDetails = () => {
                 {/* PRODUCT INFO */}
 
                 <div>
-                  <h3>
-                    {item.product
-                      ?.name ||
-                      "Product"}
-                  </h3>
+                  <h3>{item.product?.name || "Product"}</h3>
 
                   <p>
-                    <strong>
-                      Size:
-                    </strong>{" "}
-                    {item.size ||
-                      "N/A"}
+                    <strong>Size:</strong> {item.size || "N/A"}
                   </p>
 
                   <p>
-                    <strong>
-                      Quantity:
-                    </strong>{" "}
-                    {quantity}
+                    <strong>Quantity:</strong> {quantity}
                   </p>
 
                   <p>
-                    <strong>
-                      Price:
-                    </strong>{" "}
-                    ₹{price}
+                    <strong>Price:</strong> ₹{price}
                   </p>
 
                   <p>
-                    <strong>
-                      Subtotal:
-                    </strong>{" "}
-                    ₹
-                    {price *
-                      quantity}
+                    <strong>Subtotal:</strong> ₹{price * quantity}
                   </p>
                 </div>
               </div>
@@ -317,7 +301,9 @@ const AdminOrderDetails = () => {
         )}
       </div>
 
-      {/* ORDER SUMMARY */}
+      {/* =========================
+          ORDER SUMMARY
+      ========================= */}
 
       <div
         style={{
@@ -329,30 +315,64 @@ const AdminOrderDetails = () => {
       >
         <h2>Order Summary</h2>
 
-        <p>
-          <strong>Status:</strong>{" "}
-          {order.status}
-        </p>
+        {/* STATUS */}
 
-        <h2>
-          Total Amount: ₹
-          {totalAmount}
-        </h2>
+        <div>
+          <strong>Status:</strong>
+
+          <select
+            value={order.status || "Pending"}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            disabled={updatingStatus}
+            style={{
+              padding: "8px",
+              marginLeft: "10px",
+            }}
+          >
+            <option value="Pending">Pending</option>
+
+            <option value="Confirmed">Confirmed</option>
+
+            <option value="Shipped">Shipped</option>
+
+            <option value="Delivered">Delivered</option>
+
+            <option value="Cancelled">Cancelled</option>
+          </select>
+
+          {updatingStatus && (
+            <span
+              style={{
+                marginLeft: "10px",
+              }}
+            >
+              Updating...
+            </span>
+          )}
+        </div>
+
+        {/* TOTAL */}
+
+        <h2 style={{ marginTop: "20px" }}>Total Amount: ₹{totalAmount}</h2>
       </div>
 
-      {/* BUTTON */}
+      {/* =========================
+          BUTTONS
+      ========================= */}
 
       <div
         style={{
           marginTop: "30px",
+          display: "flex",
+          gap: "10px",
         }}
       >
-        <button
-          onClick={() =>
-            navigate("/admin/orders")
-          }
-        >
+        <button type="button" onClick={() => navigate("/admin/orders")}>
           Back to Orders
+        </button>
+
+        <button type="button" onClick={() => navigate("/admin")}>
+          Admin Dashboard
         </button>
       </div>
     </div>

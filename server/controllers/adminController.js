@@ -1,13 +1,8 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
-
 export const getAdminStats = async (req, res) => {
   try {
-    // =========================
-    // BASIC COUNTS
-    // =========================
-
     const totalProducts = await Product.countDocuments();
 
     const totalUsers = await User.countDocuments({
@@ -41,7 +36,7 @@ export const getAdminStats = async (req, res) => {
     });
 
     // =========================
-    // TOTAL REVENUE
+    // REVENUE
     // =========================
 
     const revenueResult = await Order.aggregate([
@@ -88,7 +83,6 @@ export const getAdminStats = async (req, res) => {
         totalUsers,
         totalOrders,
         totalRevenue,
-
         pendingOrders,
         confirmedOrders,
         shippedOrders,
@@ -99,11 +93,15 @@ export const getAdminStats = async (req, res) => {
       recentOrders,
     });
   } catch (error) {
-    console.error("ADMIN STATS ERROR:", error);
+    console.error(
+      "ADMIN STATS ERROR:",
+      error
+    );
 
     res.status(500).json({
       success: false,
-      message: "Failed to fetch admin stats",
+      message:
+        "Failed to fetch admin statistics",
     });
   }
 };
