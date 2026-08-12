@@ -8,6 +8,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+import Home from "../pages/Home";
 
 // =========================
 // ROUTE PROTECTION
@@ -43,14 +44,11 @@ const AppRoutes = () => {
   return (
     <Routes>
 
+      <Route path="/" element={<Home />} />
+
       {/* =========================
           PUBLIC ROUTES
       ========================= */}
-
-      <Route
-        path="/"
-        element={<Login />}
-      />
 
       <Route
         path="/login"
