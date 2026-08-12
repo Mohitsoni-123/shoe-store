@@ -27,7 +27,6 @@ const Login = () => {
       setLoading(true);
       setError("");
 
-      // IMPORTANT: /api mat lagao
       const response = await api.post(
         "/auth/login",
         formData
@@ -37,23 +36,37 @@ const Login = () => {
 
       // Save login data
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
 
-      // Tell CartContext that user has changed
-      window.dispatchEvent(new Event("authChanged"));
+      // Tell other components that auth changed
+      window.dispatchEvent(
+        new Event("authChanged")
+      );
 
       console.log("LOGIN SUCCESS");
       console.log("USER:", user);
+      console.log("USER ROLE:", user?.role);
       console.log("TOKEN SAVED:", !!token);
 
-      navigate("/dashboard");
+      // =========================
+      // ROLE BASED REDIRECT
+      // =========================
+
+      if (user?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
 
     } catch (error) {
       console.error("LOGIN ERROR:", error);
 
       setError(
         error.response?.data?.message ||
-        "Invalid credentials"
+          "Invalid credentials"
       );
     } finally {
       setLoading(false);
@@ -78,6 +91,7 @@ const Login = () => {
             placeholder="Enter email"
             value={formData.email}
             onChange={handleChange}
+            required
           />
         </div>
 
@@ -88,6 +102,7 @@ const Login = () => {
             placeholder="Enter password"
             value={formData.password}
             onChange={handleChange}
+            required
           />
         </div>
 
@@ -95,7 +110,9 @@ const Login = () => {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading
+            ? "Logging in..."
+            : "Login"}
         </button>
       </form>
     </div>

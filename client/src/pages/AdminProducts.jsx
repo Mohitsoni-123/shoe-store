@@ -8,10 +8,7 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Search
   const [search, setSearch] = useState("");
-
-  // Category filter
   const [category, setCategory] = useState("All");
 
   // =========================
@@ -23,7 +20,9 @@ const AdminProducts = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://localhost:5000/api/products");
+      const response = await fetch(
+        "http://localhost:5000/api/products"
+      );
 
       const data = await response.json();
 
@@ -34,7 +33,6 @@ const AdminProducts = () => {
       }
     } catch (error) {
       console.error("FETCH PRODUCTS ERROR:", error);
-
       setError("Failed to fetch products");
     } finally {
       setLoading(false);
@@ -51,46 +49,56 @@ const AdminProducts = () => {
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?",
+      "Are you sure you want to delete this product?"
     );
 
-    if (!confirmDelete) {
-      return;
-    }
+    if (!confirmDelete) return;
 
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/products/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
       if (data.success) {
         setProducts((prevProducts) =>
-          prevProducts.filter((product) => product._id !== id),
+          prevProducts.filter(
+            (product) => product._id !== id
+          )
         );
+
+        alert("Product deleted successfully");
       } else {
-        alert(data.message || "Failed to delete product");
+        alert(
+          data.message || "Failed to delete product"
+        );
       }
     } catch (error) {
       console.error("DELETE PRODUCT ERROR:", error);
-
       alert("Failed to delete product");
     }
   };
 
   // =========================
-  // GET UNIQUE CATEGORIES
+  // CATEGORIES
   // =========================
 
   const categories = [
     "All",
-    ...new Set(products.map((product) => product.category).filter(Boolean)),
+    ...new Set(
+      products
+        .map((product) => product.category)
+        .filter(Boolean)
+    ),
   ];
 
   // =========================
@@ -98,15 +106,26 @@ const AdminProducts = () => {
   // =========================
 
   const filteredProducts = products.filter((product) => {
-    const searchText = search.toLowerCase().trim();
+    const searchText = search
+      .toLowerCase()
+      .trim();
 
     const matchesSearch =
-      product.name?.toLowerCase().includes(searchText) ||
-      product.brand?.toLowerCase().includes(searchText);
+      product.name
+        ?.toLowerCase()
+        .includes(searchText) ||
+      product.brand
+        ?.toLowerCase()
+        .includes(searchText);
 
-    const matchesCategory = category === "All" || product.category === category;
+    const matchesCategory =
+      category === "All" ||
+      product.category === category;
 
-    return matchesSearch && matchesCategory;
+    return (
+      matchesSearch &&
+      matchesCategory
+    );
   });
 
   // =========================
@@ -115,8 +134,9 @@ const AdminProducts = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: "40px" }}>
-        <h2>Loading products...</h2>
+      <div style={styles.loadingContainer}>
+        <div style={styles.loader}>⌛</div>
+        <h2>Loading Products...</h2>
       </div>
     );
   }
@@ -126,71 +146,123 @@ const AdminProducts = () => {
   // =========================
 
   return (
-    <div style={{ padding: "40px" }}>
-      {/* Header */}
+    <div style={styles.page}>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "30px",
-        }}
-      >
-        <h1>Manage Products</h1>
+      {/* ================= HEADER ================= */}
 
-        <button onClick={() => navigate("/admin/products/add")}>
+      <div style={styles.header}>
+        <div>
+          <h1 style={styles.title}>
+            Manage Products
+          </h1>
+
+          <p style={styles.subtitle}>
+            Manage your ShoeStore products
+          </p>
+        </div>
+
+        <button
+          onClick={() =>
+            navigate("/admin/products/add")
+          }
+          style={styles.addButton}
+        >
           + Add Product
         </button>
       </div>
 
-      {/* Error */}
+      {/* ================= ERROR ================= */}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <div style={styles.error}>
+          ⚠️ {error}
+        </div>
+      )}
 
-      {/* Search + Filter */}
+      {/* ================= STATISTICS ================= */}
 
-      <div
-        style={{
-          display: "flex",
-          gap: "15px",
-          marginBottom: "30px",
-        }}
-      >
-        {/* Search */}
+      <div style={styles.statsContainer}>
 
-        <input
-          type="text"
-          placeholder="Search product or brand..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            padding: "10px",
-            width: "300px",
-            border: "1px solid #ccc",
-            borderRadius: "6px",
-          }}
-        />
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>👟</div>
 
-        {/* Category */}
+          <div>
+            <p style={styles.statTitle}>
+              Total Products
+            </p>
+
+            <h2 style={styles.statValue}>
+              {products.length}
+            </h2>
+          </div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>🔎</div>
+
+          <div>
+            <p style={styles.statTitle}>
+              Search Results
+            </p>
+
+            <h2 style={styles.statValue}>
+              {filteredProducts.length}
+            </h2>
+          </div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>📂</div>
+
+          <div>
+            <p style={styles.statTitle}>
+              Categories
+            </p>
+
+            <h2 style={styles.statValue}>
+              {categories.length - 1}
+            </h2>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ================= SEARCH ================= */}
+
+      <div style={styles.filterBox}>
+
+        <div style={styles.searchWrapper}>
+          <span style={styles.searchIcon}>
+            🔍
+          </span>
+
+          <input
+            type="text"
+            placeholder="Search by product name or brand..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            style={styles.searchInput}
+          />
+        </div>
 
         <select
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          style={{
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "6px",
-          }}
+          onChange={(e) =>
+            setCategory(e.target.value)
+          }
+          style={styles.select}
         >
           {categories.map((item) => (
-            <option key={item} value={item}>
+            <option
+              key={item}
+              value={item}
+            >
               {item}
             </option>
           ))}
         </select>
-
-        {/* Clear */}
 
         <button
           type="button"
@@ -198,115 +270,549 @@ const AdminProducts = () => {
             setSearch("");
             setCategory("All");
           }}
+          style={styles.clearButton}
         >
           Clear
         </button>
+
       </div>
 
-      {/* Result Count */}
+      {/* ================= RESULT COUNT ================= */}
 
-      <p>
-        Showing <strong>{filteredProducts.length}</strong> of{" "}
-        <strong>{products.length}</strong> products
-      </p>
+      <div style={styles.resultHeader}>
+        <p>
+          Showing{" "}
+          <strong>
+            {filteredProducts.length}
+          </strong>{" "}
+          of{" "}
+          <strong>
+            {products.length}
+          </strong>{" "}
+          products
+        </p>
+      </div>
 
-      {/* Products */}
+      {/* ================= PRODUCTS ================= */}
 
       {filteredProducts.length === 0 ? (
-        <h3>No products found.</h3>
+
+        <div style={styles.empty}>
+          <div style={styles.emptyIcon}>
+            📦
+          </div>
+
+          <h2>No Products Found</h2>
+
+          <p>
+            Try changing your search or
+            category filter.
+          </p>
+        </div>
+
       ) : (
-        <div>
-          {filteredProducts.map((product) => (
-            <div
-              key={product._id}
-              style={{
-                border: "1px solid #ddd",
-                padding: "20px",
-                marginBottom: "20px",
-                borderRadius: "8px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  gap: "20px",
-                  alignItems: "center",
-                }}
-              >
-                {/* Image */}
 
-                {product.images?.[0] && (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    style={{
-                      width: "120px",
-                      height: "120px",
-                      objectFit: "cover",
-                    }}
-                  />
-                )}
+        <div style={styles.productGrid}>
 
-                {/* Product Info */}
+          {filteredProducts.map(
+            (product) => {
 
+              const finalPrice =
+                product.discountPrice ||
+                product.price ||
+                0;
+
+              return (
                 <div
-                  style={{
-                    flex: 1,
-                  }}
+                  key={product._id}
+                  style={styles.productCard}
                 >
-                  <h2>{product.name}</h2>
 
-                  <p>Brand: {product.brand}</p>
+                  {/* IMAGE */}
 
-                  <p>Category: {product.category}</p>
+                  <div style={styles.imageContainer}>
 
-                  <p>Price: ₹{product.discountPrice || product.price}</p>
+                    {product.images?.[0] ? (
+                      <img
+                        src={
+                          product.images[0]
+                        }
+                        alt={
+                          product.name
+                        }
+                        style={
+                          styles.productImage
+                        }
+                      />
+                    ) : (
+                      <div
+                        style={
+                          styles.noImage
+                        }
+                      >
+                        👟
+                      </div>
+                    )}
 
-                  <p>Stock: {product.stock}</p>
+                    {product.discountPrice &&
+                      product.price >
+                        product.discountPrice && (
+                        <span
+                          style={
+                            styles.discountBadge
+                          }
+                        >
+                          SALE
+                        </span>
+                      )}
+
+                  </div>
+
+                  {/* PRODUCT INFO */}
+
+                  <div style={styles.productInfo}>
+
+                    <span
+                      style={
+                        styles.categoryBadge
+                      }
+                    >
+                      {product.category ||
+                        "General"}
+                    </span>
+
+                    <h2
+                      style={
+                        styles.productName
+                      }
+                    >
+                      {product.name}
+                    </h2>
+
+                    <p
+                      style={
+                        styles.brand
+                      }
+                    >
+                      {product.brand ||
+                        "Unknown Brand"}
+                    </p>
+
+                    {/* PRICE */}
+
+                    <div
+                      style={
+                        styles.priceRow
+                      }
+                    >
+
+                      <strong
+                        style={
+                          styles.price
+                        }
+                      >
+                        ₹{finalPrice}
+                      </strong>
+
+                      {product.discountPrice &&
+                        product.price >
+                          product.discountPrice && (
+                          <span
+                            style={
+                              styles.oldPrice
+                            }
+                          >
+                            ₹
+                            {
+                              product.price
+                            }
+                          </span>
+                        )}
+
+                    </div>
+
+                    {/* STOCK */}
+
+                    <div
+                      style={
+                        styles.stockRow
+                      }
+                    >
+
+                      <span>
+                        Stock
+                      </span>
+
+                      <strong
+                        style={{
+                          color:
+                            product.stock > 0
+                              ? "#16a34a"
+                              : "#dc2626",
+                        }}
+                      >
+                        {product.stock || 0}
+                      </strong>
+
+                    </div>
+
+                    {/* ACTIONS */}
+
+                    <div
+                      style={
+                        styles.actions
+                      }
+                    >
+
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/admin/products/edit/${product._id}`
+                          )
+                        }
+                        style={
+                          styles.editButton
+                        }
+                      >
+                        ✏️ Edit
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            product._id
+                          )
+                        }
+                        style={
+                          styles.deleteButton
+                        }
+                      >
+                        🗑️ Delete
+                      </button>
+
+                    </div>
+
+                  </div>
+
                 </div>
+              );
+            }
+          )}
 
-                {/* Actions */}
-
-                <div>
-                  <button
-                    onClick={() =>
-                      navigate(`/admin/products/edit/${product._id}`)
-                    }
-                    style={{
-                      marginRight: "10px",
-                    }}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(product._id)}
-                    style={{
-                      color: "red",
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
-      {/* Back */}
+      {/* ================= BACK ================= */}
 
-      <div
-        style={{
-          marginTop: "30px",
-        }}
-      >
-        <button onClick={() => navigate("/admin")}>
-          Back to Admin Dashboard
+      <div style={styles.backContainer}>
+        <button
+          onClick={() =>
+            navigate("/admin")
+          }
+          style={styles.backButton}
+        >
+          ← Back to Admin Dashboard
         </button>
       </div>
+
     </div>
   );
+};
+
+// =====================================================
+// STYLES
+// =====================================================
+
+const styles = {
+
+  page: {
+    minHeight: "100vh",
+    background: "#f5f6fa",
+    padding: "35px",
+    boxSizing: "border-box",
+  },
+
+  loadingContainer: {
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#f5f6fa",
+  },
+
+  loader: {
+    fontSize: "40px",
+  },
+
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "30px",
+    flexWrap: "wrap",
+    gap: "15px",
+  },
+
+  title: {
+    margin: 0,
+    fontSize: "32px",
+    color: "#111827",
+  },
+
+  subtitle: {
+    marginTop: "8px",
+    color: "#6b7280",
+  },
+
+  addButton: {
+    background: "#2563eb",
+    color: "white",
+    border: "none",
+    padding: "12px 20px",
+    borderRadius: "7px",
+    fontSize: "15px",
+    cursor: "pointer",
+    fontWeight: "600",
+  },
+
+  error: {
+    background: "#fee2e2",
+    color: "#b91c1c",
+    padding: "15px",
+    borderRadius: "8px",
+    marginBottom: "20px",
+  },
+
+  statsContainer: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "20px",
+    marginBottom: "25px",
+  },
+
+  statCard: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    boxShadow:
+      "0 2px 8px rgba(0,0,0,0.05)",
+  },
+
+  statIcon: {
+    fontSize: "30px",
+  },
+
+  statTitle: {
+    margin: 0,
+    color: "#6b7280",
+    fontSize: "14px",
+  },
+
+  statValue: {
+    margin: "5px 0 0",
+    color: "#111827",
+  },
+
+  filterBox: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    display: "flex",
+    gap: "12px",
+    marginBottom: "20px",
+    flexWrap: "wrap",
+    boxShadow:
+      "0 2px 8px rgba(0,0,0,0.04)",
+  },
+
+  searchWrapper: {
+    position: "relative",
+    flex: 1,
+    minWidth: "250px",
+  },
+
+  searchIcon: {
+    position: "absolute",
+    left: "12px",
+    top: "10px",
+  },
+
+  searchInput: {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "11px 12px 11px 38px",
+    border: "1px solid #d1d5db",
+    borderRadius: "6px",
+    outline: "none",
+  },
+
+  select: {
+    padding: "11px",
+    border: "1px solid #d1d5db",
+    borderRadius: "6px",
+    minWidth: "150px",
+  },
+
+  clearButton: {
+    padding: "10px 18px",
+    background: "#f3f4f6",
+    border: "1px solid #d1d5db",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  resultHeader: {
+    color: "#6b7280",
+    marginBottom: "15px",
+  },
+
+  productGrid: {
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "20px",
+  },
+
+  productCard: {
+    background: "white",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow:
+      "0 3px 10px rgba(0,0,0,0.07)",
+  },
+
+  imageContainer: {
+    height: "230px",
+    background: "#f9fafb",
+    position: "relative",
+  },
+
+  productImage: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+
+  noImage: {
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "60px",
+  },
+
+  discountBadge: {
+    position: "absolute",
+    top: "12px",
+    left: "12px",
+    background: "#dc2626",
+    color: "white",
+    padding: "5px 9px",
+    borderRadius: "5px",
+    fontSize: "12px",
+    fontWeight: "bold",
+  },
+
+  productInfo: {
+    padding: "18px",
+  },
+
+  categoryBadge: {
+    background: "#eff6ff",
+    color: "#2563eb",
+    padding: "4px 8px",
+    borderRadius: "5px",
+    fontSize: "12px",
+  },
+
+  productName: {
+    fontSize: "20px",
+    margin: "12px 0 5px",
+  },
+
+  brand: {
+    color: "#6b7280",
+    margin: 0,
+  },
+
+  priceRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    marginTop: "15px",
+  },
+
+  price: {
+    fontSize: "20px",
+  },
+
+  oldPrice: {
+    color: "#9ca3af",
+    textDecoration: "line-through",
+  },
+
+  stockRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: "15px",
+    paddingTop: "12px",
+    borderTop: "1px solid #eee",
+  },
+
+  actions: {
+    display: "flex",
+    gap: "10px",
+    marginTop: "15px",
+  },
+
+  editButton: {
+    flex: 1,
+    padding: "9px",
+    background: "#2563eb",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  deleteButton: {
+    flex: 1,
+    padding: "9px",
+    background: "#fee2e2",
+    color: "#dc2626",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+
+  empty: {
+    background: "white",
+    padding: "60px",
+    textAlign: "center",
+    borderRadius: "10px",
+  },
+
+  emptyIcon: {
+    fontSize: "50px",
+  },
+
+  backContainer: {
+    marginTop: "30px",
+  },
+
+  backButton: {
+    padding: "11px 18px",
+    background: "#111827",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
 };
 
 export default AdminProducts;
