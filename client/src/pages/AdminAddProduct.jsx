@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./AdminAddProduct.css";
 
 const AdminAddProduct = () => {
   const navigate = useNavigate();
@@ -25,9 +24,15 @@ const AdminAddProduct = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // =========================
-  // INPUT CHANGE
-  // =========================
+  const categories = [
+    "Sneakers",
+    "Running",
+    "Sports",
+    "Casual",
+    "Formal",
+    "Boots",
+    "Sandals",
+  ];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -37,10 +42,6 @@ const AdminAddProduct = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
-  // =========================
-  // ADD SIZE
-  // =========================
 
   const addSize = () => {
     const size = sizeInput.trim();
@@ -60,20 +61,12 @@ const AdminAddProduct = () => {
     setSizeInput("");
   };
 
-  // =========================
-  // REMOVE SIZE
-  // =========================
-
-  const removeSize = (sizeToRemove) => {
+  const removeSize = (size) => {
     setFormData((prev) => ({
       ...prev,
-      sizes: prev.sizes.filter((size) => size !== sizeToRemove),
+      sizes: prev.sizes.filter((item) => item !== size),
     }));
   };
-
-  // =========================
-  // ADD COLOR
-  // =========================
 
   const addColor = () => {
     const color = colorInput.trim();
@@ -93,30 +86,22 @@ const AdminAddProduct = () => {
     setColorInput("");
   };
 
-  // =========================
-  // REMOVE COLOR
-  // =========================
-
-  const removeColor = (colorToRemove) => {
+  const removeColor = (color) => {
     setFormData((prev) => ({
       ...prev,
-      colors: prev.colors.filter((color) => color !== colorToRemove),
+      colors: prev.colors.filter((item) => item !== color),
     }));
   };
 
-  // =========================
-  // IMAGE CHANGE
-  // =========================
-
   const handleImageChange = (e) => {
-    const selectedImages = Array.from(e.target.files || []);
+    const selectedImages = Array.from(e.target.files);
 
     setImages(selectedImages);
   };
 
-  // =========================
-  // SUBMIT
-  // =========================
+  const removeImage = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -132,30 +117,23 @@ const AdminAddProduct = () => {
         return;
       }
 
-      // Validate sizes
       if (formData.sizes.length === 0) {
         setError("Please add at least one size.");
         setLoading(false);
         return;
       }
 
-      // Validate colors
       if (formData.colors.length === 0) {
         setError("Please add at least one color.");
         setLoading(false);
         return;
       }
 
-      // Validate images
       if (images.length === 0) {
         setError("Please select at least one product image.");
         setLoading(false);
         return;
       }
-
-      // =========================
-      // FORM DATA
-      // =========================
 
       const data = new FormData();
 
@@ -172,14 +150,9 @@ const AdminAddProduct = () => {
       data.append("stock", formData.stock);
       data.append("isFeatured", formData.isFeatured);
 
-      // Images
       images.forEach((image) => {
         data.append("images", image);
       });
-
-      // =========================
-      // API REQUEST
-      // =========================
 
       const response = await fetch(
         "http://localhost:5000/api/products",
@@ -196,10 +169,8 @@ const AdminAddProduct = () => {
 
       console.log("CREATE PRODUCT RESPONSE:", result);
 
-      if (!response.ok || !result.success) {
-        setError(
-          result.message || "Failed to create product."
-        );
+      if (!result.success) {
+        setError(result.message || "Failed to create product.");
         return;
       }
 
@@ -209,588 +180,436 @@ const AdminAddProduct = () => {
     } catch (error) {
       console.error("CREATE PRODUCT ERROR:", error);
 
-      setError(
-        "Unable to connect to server. Please make sure backend is running."
-      );
+      setError("Failed to create product. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="add-product-page">
-
-      {/* ================= HEADER ================= */}
-
-      <div className="add-product-header">
-
-        <div>
-          <div className="breadcrumb">
-            <span onClick={() => navigate("/admin/dashboard")}>
-              Admin Dashboard
-            </span>
-
-            <span>/</span>
-
-            <span onClick={() => navigate("/admin/products")}>
-              Products
-            </span>
-
-            <span>/</span>
-
-            <strong>Add Product</strong>
-          </div>
-
-          <h1>Add New Product</h1>
-
-          <p>
-            Add a new shoe product to your store.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          className="back-btn"
-          onClick={() => navigate("/admin/products")}
-        >
-          ← Back to Products
-        </button>
-
-      </div>
-
-      {/* ================= ERROR ================= */}
-
-      {error && (
-        <div className="error-box">
-          <span>⚠</span>
-          {error}
-        </div>
-      )}
-
-      {/* ================= FORM ================= */}
-
-      <form
-        className="product-form"
-        onSubmit={handleSubmit}
-      >
-
-        {/* ================= BASIC INFORMATION ================= */}
-
-        <section className="form-card">
-
-          <div className="section-header">
-            <div className="section-icon">
-              📦
-            </div>
-
-            <div>
-              <h2>Basic Information</h2>
-
-              <p>
-                Enter the basic details of your product.
-              </p>
-            </div>
-          </div>
-
-          <div className="form-grid">
-
-            {/* Product Name */}
-
-            <div className="form-group full-width">
-              <label>
-                Product Name
-                <span>*</span>
-              </label>
-
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Nike Air Max"
-                required
-              />
-            </div>
-
-            {/* Brand */}
-
-            <div className="form-group">
-              <label>
-                Brand
-                <span>*</span>
-              </label>
-
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                placeholder="Nike"
-                required
-              />
-            </div>
-
-            {/* Category */}
-
-            <div className="form-group">
-              <label>
-                Category
-                <span>*</span>
-              </label>
-
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-              >
-                <option value="">
-                  Select category
-                </option>
-
-                <option value="Running">
-                  Running
-                </option>
-
-                <option value="Casual">
-                  Casual
-                </option>
-
-                <option value="Sports">
-                  Sports
-                </option>
-
-                <option value="Sneakers">
-                  Sneakers
-                </option>
-
-                <option value="Formal">
-                  Formal
-                </option>
-
-                <option value="Boots">
-                  Boots
-                </option>
-              </select>
-            </div>
-
-            {/* Stock */}
-
-            <div className="form-group">
-              <label>
-                Stock
-                <span>*</span>
-              </label>
-
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                placeholder="50"
-                min="0"
-                required
-              />
-            </div>
-
-            {/* Description */}
-
-            <div className="form-group full-width">
-
-              <label>
-                Description
-                <span>*</span>
-              </label>
-
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Enter product description..."
-                rows="5"
-                required
-              />
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ================= PRICING ================= */}
-
-        <section className="form-card">
-
-          <div className="section-header">
-
-            <div className="section-icon">
-              ₹
-            </div>
-
-            <div>
-              <h2>Pricing</h2>
-
-              <p>
-                Set the original and discounted price.
-              </p>
-            </div>
-
-          </div>
-
-          <div className="form-grid">
-
-            {/* Original Price */}
-
-            <div className="form-group">
-
-              <label>
-                Original Price
-                <span>*</span>
-              </label>
-
-              <div className="price-input">
-
-                <span>₹</span>
-
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  placeholder="8999"
-                  min="0"
-                  required
-                />
-
-              </div>
-
-            </div>
-
-            {/* Discount Price */}
-
-            <div className="form-group">
-
-              <label>
-                Discount Price
-              </label>
-
-              <div className="price-input">
-
-                <span>₹</span>
-
-                <input
-                  type="number"
-                  name="discountPrice"
-                  value={formData.discountPrice}
-                  onChange={handleChange}
-                  placeholder="6999"
-                  min="0"
-                />
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ================= VARIANTS ================= */}
-
-        <section className="form-card">
-
-          <div className="section-header">
-
-            <div className="section-icon">
-              🎨
-            </div>
-
-            <div>
-              <h2>Product Variants</h2>
-
-              <p>
-                Add available sizes and colors.
-              </p>
-            </div>
-
-          </div>
-
-          <div className="variant-grid">
-
-            {/* Sizes */}
-
-            <div className="variant-box">
-
-              <label>
-                Available Sizes
-              </label>
-
-              <div className="add-item">
-
-                <input
-                  type="text"
-                  value={sizeInput}
-                  onChange={(e) =>
-                    setSizeInput(e.target.value)
-                  }
-                  placeholder="Example: 9"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addSize();
-                    }
-                  }}
-                />
-
-                <button
-                  type="button"
-                  onClick={addSize}
-                >
-                  + Add
-                </button>
-
-              </div>
-
-              <div className="tags">
-
-                {formData.sizes.map((size) => (
-                  <div
-                    className="tag"
-                    key={size}
-                  >
-                    <span>{size}</span>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeSize(size)
-                      }
-                    >
-                      ×
-                    </button>
-
-                  </div>
-                ))}
-
-              </div>
-
-            </div>
-
-            {/* Colors */}
-
-            <div className="variant-box">
-
-              <label>
-                Available Colors
-              </label>
-
-              <div className="add-item">
-
-                <input
-                  type="text"
-                  value={colorInput}
-                  onChange={(e) =>
-                    setColorInput(e.target.value)
-                  }
-                  placeholder="Example: Black"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addColor();
-                    }
-                  }}
-                />
-
-                <button
-                  type="button"
-                  onClick={addColor}
-                >
-                  + Add
-                </button>
-
-              </div>
-
-              <div className="tags">
-
-                {formData.colors.map((color) => (
-                  <div
-                    className="tag color-tag"
-                    key={color}
-                  >
-                    <span>{color}</span>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeColor(color)
-                      }
-                    >
-                      ×
-                    </button>
-
-                  </div>
-                ))}
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ================= IMAGES ================= */}
-
-        <section className="form-card">
-
-          <div className="section-header">
-
-            <div className="section-icon">
-              🖼️
-            </div>
-
-            <div>
-              <h2>Product Images</h2>
-
-              <p>
-                Upload product images.
-              </p>
-            </div>
-
-          </div>
-
-          <label className="upload-area">
-
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageChange}
-            />
-
-            <div className="upload-icon">
-              ⬆
-            </div>
-
-            <h3>
-              Click to upload images
-            </h3>
-
-            <p>
-              PNG, JPG, JPEG up to 5MB each
-            </p>
-
-          </label>
-
-          {images.length > 0 && (
-
-            <div className="selected-images">
-
-              <h3>
-                Selected Images ({images.length})
-              </h3>
-
-              <div className="image-list">
-
-                {images.map((image, index) => (
-
-                  <div
-                    className="image-item"
-                    key={index}
-                  >
-
-                    <span>
-                      🖼️
-                    </span>
-
-                    <div>
-                      <strong>
-                        {image.name}
-                      </strong>
-
-                      <small>
-                        {(image.size / 1024 / 1024).toFixed(2)} MB
-                      </small>
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            </div>
-
-          )}
-
-        </section>
-
-        {/* ================= FEATURED ================= */}
-
-        <section className="form-card featured-card">
-
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+      <div className="mx-auto max-w-6xl">
+
+        {/* Header */}
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-
-            <h2>
-              Featured Product
-            </h2>
-
-            <p>
-              Show this product in the featured section.
+            <p className="text-sm font-medium text-blue-600">
+              ADMIN PANEL
             </p>
 
+            <h1 className="mt-1 text-3xl font-bold text-gray-900">
+              Add New Product
+            </h1>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Add a new shoe product to your store.
+            </p>
           </div>
-
-          <label className="switch">
-
-            <input
-              type="checkbox"
-              name="isFeatured"
-              checked={formData.isFeatured}
-              onChange={handleChange}
-            />
-
-            <span className="slider"></span>
-
-          </label>
-
-        </section>
-
-        {/* ================= ACTIONS ================= */}
-
-        <div className="form-actions">
 
           <button
             type="button"
-            className="cancel-btn"
-            onClick={() =>
-              navigate("/admin/products")
-            }
+            onClick={() => navigate("/admin/products")}
+            className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
           >
-            Cancel
+            ← Back to Products
           </button>
-
-          <button
-            type="submit"
-            className="create-btn"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner"></span>
-                Creating Product...
-              </>
-            ) : (
-              <>
-                + Create Product
-              </>
-            )}
-          </button>
-
         </div>
 
-      </form>
+        {/* Error */}
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            {error}
+          </div>
+        )}
 
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+            {/* LEFT SIDE */}
+            <div className="space-y-6 lg:col-span-2">
+
+              {/* Basic Information */}
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <h2 className="mb-5 text-lg font-semibold text-gray-900">
+                  Basic Information
+                </h2>
+
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                  {/* Product Name */}
+                  <div className="md:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Product Name
+                    </label>
+
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Nike Air Max 270"
+                      required
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+
+                  {/* Brand */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Brand
+                    </label>
+
+                    <input
+                      type="text"
+                      name="brand"
+                      value={formData.brand}
+                      onChange={handleChange}
+                      placeholder="Nike"
+                      required
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Category
+                    </label>
+
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleChange}
+                      required
+                      className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    >
+                      <option value="">
+                        Select category
+                      </option>
+
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Description */}
+                  <div className="md:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Description
+                    </label>
+
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Enter product description..."
+                      rows="5"
+                      required
+                      className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <h2 className="mb-5 text-lg font-semibold text-gray-900">
+                  Pricing & Inventory
+                </h2>
+
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Price
+                    </label>
+
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                        ₹
+                      </span>
+
+                      <input
+                        type="number"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        placeholder="8999"
+                        required
+                        className="w-full rounded-lg border border-gray-300 py-3 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Discount Price
+                    </label>
+
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                        ₹
+                      </span>
+
+                      <input
+                        type="number"
+                        name="discountPrice"
+                        value={formData.discountPrice}
+                        onChange={handleChange}
+                        placeholder="6999"
+                        className="w-full rounded-lg border border-gray-300 py-3 pl-9 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Stock
+                    </label>
+
+                    <input
+                      type="number"
+                      name="stock"
+                      value={formData.stock}
+                      onChange={handleChange}
+                      placeholder="50"
+                      required
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sizes */}
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <h2 className="mb-2 text-lg font-semibold text-gray-900">
+                  Available Sizes
+                </h2>
+
+                <p className="mb-5 text-sm text-gray-500">
+                  Add all available shoe sizes.
+                </p>
+
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={sizeInput}
+                    onChange={(e) => setSizeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addSize();
+                      }
+                    }}
+                    placeholder="Example: 8"
+                    className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={addSize}
+                    className="rounded-lg bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800"
+                  >
+                    + Add
+                  </button>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {formData.sizes.map((size) => (
+                    <div
+                      key={size}
+                      className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700"
+                    >
+                      <span>{size}</span>
+
+                      <button
+                        type="button"
+                        onClick={() => removeSize(size)}
+                        className="text-blue-500 hover:text-red-500"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Colors */}
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <h2 className="mb-2 text-lg font-semibold text-gray-900">
+                  Available Colors
+                </h2>
+
+                <p className="mb-5 text-sm text-gray-500">
+                  Add all available product colors.
+                </p>
+
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={colorInput}
+                    onChange={(e) => setColorInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addColor();
+                      }
+                    }}
+                    placeholder="Example: Black"
+                    className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={addColor}
+                    className="rounded-lg bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800"
+                  >
+                    + Add
+                  </button>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {formData.colors.map((color) => (
+                    <div
+                      key={color}
+                      className="flex items-center gap-2 rounded-lg bg-purple-50 px-3 py-2 text-sm font-medium text-purple-700"
+                    >
+                      <span>{color}</span>
+
+                      <button
+                        type="button"
+                        onClick={() => removeColor(color)}
+                        className="text-purple-500 hover:text-red-500"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT SIDE */}
+            <div className="space-y-6">
+
+              {/* Images */}
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <h2 className="mb-2 text-lg font-semibold text-gray-900">
+                  Product Images
+                </h2>
+
+                <p className="mb-5 text-sm text-gray-500">
+                  Upload high-quality product images.
+                </p>
+
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-5 py-10 text-center transition hover:border-blue-400 hover:bg-blue-50">
+                  <div className="mb-3 text-4xl">
+                    📷
+                  </div>
+
+                  <p className="text-sm font-medium text-gray-700">
+                    Click to upload images
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    PNG, JPG, JPEG
+                  </p>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+
+                {images.length > 0 && (
+                  <div className="mt-5">
+                    <p className="mb-3 text-sm font-medium text-gray-700">
+                      Selected Images ({images.length})
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {images.map((image, index) => (
+                        <div
+                          key={`${image.name}-${index}`}
+                          className="relative overflow-hidden rounded-lg border bg-gray-50"
+                        >
+                          <img
+                            src={URL.createObjectURL(image)}
+                            alt={image.name}
+                            className="h-28 w-full object-cover"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm text-white hover:bg-red-600"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Featured */}
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-semibold text-gray-900">
+                      Featured Product
+                    </h2>
+
+                    <p className="mt-1 text-xs text-gray-500">
+                      Show this product on homepage.
+                    </p>
+                  </div>
+
+                  <label className="relative inline-flex cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      name="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={handleChange}
+                      className="peer sr-only"
+                    />
+
+                    <div className="h-6 w-11 rounded-full bg-gray-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-blue-600 peer-checked:after:translate-x-full" />
+                  </label>
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="rounded-xl bg-white p-6 shadow-sm">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-lg bg-blue-600 px-5 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading
+                    ? "Creating Product..."
+                    : "Create Product"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/admin/products")}
+                  className="mt-3 w-full rounded-lg border border-gray-300 bg-white px-5 py-3.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
