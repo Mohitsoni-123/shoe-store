@@ -1,6 +1,11 @@
 import Product from "../models/Product.js";
 import cloudinary from "../config/cloudinary.js";
 import { Readable } from "stream";
+
+// ===============================
+// CREATE PRODUCT
+// ===============================
+
 export const createProduct = async (req, res) => {
   try {
     const {
@@ -34,6 +39,7 @@ export const createProduct = async (req, res) => {
 
     let imageUrls = [];
 
+    // Upload images to Cloudinary
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const uploadResult = await new Promise((resolve, reject) => {
@@ -47,7 +53,7 @@ export const createProduct = async (req, res) => {
               } else {
                 resolve(result);
               }
-            },
+            }
           );
 
           Readable.from(file.buffer).pipe(stream);
@@ -57,7 +63,6 @@ export const createProduct = async (req, res) => {
       }
     }
 
-    
     const product = await Product.create({
       name,
       brand,
@@ -65,8 +70,14 @@ export const createProduct = async (req, res) => {
       price,
       discountPrice,
       category,
-      sizes: typeof sizes === "string" ? JSON.parse(sizes) : sizes,
-      colors: typeof colors === "string" ? JSON.parse(colors) : colors,
+      sizes:
+        typeof sizes === "string"
+          ? JSON.parse(sizes)
+          : sizes,
+      colors:
+        typeof colors === "string"
+          ? JSON.parse(colors)
+          : colors,
       images: imageUrls,
       stock,
       isFeatured,
@@ -78,7 +89,7 @@ export const createProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.error(error);
+    console.error("CREATE PRODUCT ERROR:", error);
 
     res.status(500).json({
       success: false,
@@ -87,9 +98,20 @@ export const createProduct = async (req, res) => {
   }
 };
 
+// ===============================
+// GET ALL PRODUCTS
+// ===============================
+
 export const getProducts = async (req, res) => {
   try {
-    const { search, category, brand, minPrice, maxPrice, sort } = req.query;
+    const {
+      search,
+      category,
+      brand,
+      minPrice,
+      maxPrice,
+      sort,
+    } = req.query;
 
     const filter = {};
 
@@ -121,7 +143,7 @@ export const getProducts = async (req, res) => {
       filter.brand = brand;
     }
 
-    // Price Filter
+    // Price
     if (minPrice || maxPrice) {
       filter.price = {};
 
@@ -165,7 +187,7 @@ export const getProducts = async (req, res) => {
       products,
     });
   } catch (error) {
-    console.error(error);
+    console.error("GET PRODUCTS ERROR:", error);
 
     res.status(500).json({
       success: false,
@@ -174,9 +196,14 @@ export const getProducts = async (req, res) => {
   }
 };
 
+// ===============================
+// GET PRODUCT BY ID
+// ===============================
+
 export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
+
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -189,7 +216,7 @@ export const getProductById = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.log(error);
+    console.error("GET PRODUCT BY ID ERROR:", error);
 
     res.status(500).json({
       success: false,
@@ -198,12 +225,46 @@ export const getProductById = async (req, res) => {
   }
 };
 
+// ===============================
+// UPDATE PRODUCT
+// ===============================
+
 export const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const {
+      name,
+      brand,
+      description,
+      price,
+      discountPrice,
+      category,
+      sizes,
+      colors,
+      stock,
+      isFeatured,
+    } = req.body;
+
+    const updateData = {
+      name,
+      brand,
+      description,
+      price,
+      discountPrice,
+      category,
+      sizes,
+      colors,
+      stock,
+      isFeatured,
+    };
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!product) {
       return res.status(404).json({
@@ -218,7 +279,7 @@ export const updateProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.error(error);
+    console.error("UPDATE PRODUCT ERROR:", error);
 
     res.status(500).json({
       success: false,
@@ -227,9 +288,15 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+// ===============================
+// DELETE PRODUCT
+// ===============================
+
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndDelete(
+      req.params.id
+    );
 
     if (!product) {
       return res.status(404).json({
@@ -243,7 +310,7 @@ export const deleteProduct = async (req, res) => {
       message: "Product deleted successfully",
     });
   } catch (error) {
-    console.error(error);
+    console.error("DELETE PRODUCT ERROR:", error);
 
     res.status(500).json({
       success: false,
