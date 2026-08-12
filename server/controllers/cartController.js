@@ -67,10 +67,11 @@ export const addToCart = async (req, res) => {
 
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({
+    let cart = await Cart.findOne({
       user: req.user.id,
     }).populate("items.product");
 
+    // Cart doesn't exist
     if (!cart) {
       return res.status(200).json({
         success: true,
@@ -80,12 +81,23 @@ export const getCart = async (req, res) => {
       });
     }
 
+    // Remove old/deleted products from cart
+    const validItems = cart.items.filter(
+      (item) => item.product !== null
+    );
+
+    // If invalid products were found, update DB
+    if (validItems.length !== cart.items.length) {
+      cart.items = validItems;
+      await cart.save();
+    }
+
     res.status(200).json({
       success: true,
       cart,
     });
   } catch (error) {
-    console.error(error);
+    console.error("GET CART ERROR:", error);
 
     res.status(500).json({
       success: false,
