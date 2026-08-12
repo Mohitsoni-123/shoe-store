@@ -2,202 +2,253 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const Products = () => {
-  // Temporary products
-  // Backend integration next step mein karenge
   const [products, setProducts] = useState([]);
-const [loading, setLoading] = useState(true);
-const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-      const response = await fetch(
-        "http://localhost:5000/api/products"
-      );
+        const response = await fetch("http://localhost:5000/api/products");
 
-      const data = await response.json();
+        const data = await response.json();
 
-      console.log("PRODUCTS RESPONSE:", data);
+        console.log("PRODUCTS RESPONSE:", data);
 
-      if (!data.success) {
-        setError(data.message || "Failed to fetch products");
-        return;
+        if (!response.ok || !data.success) {
+          setError(data.message || "Failed to fetch products");
+          return;
+        }
+
+        setProducts(data.products || []);
+      } catch (error) {
+        console.error("FETCH PRODUCTS ERROR:", error);
+
+        setError(
+          "Unable to connect to server. Please make sure backend is running.",
+        );
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setProducts(data.products || []);
-    } catch (error) {
-      console.error("FETCH PRODUCTS ERROR:", error);
-      setError("Failed to load products");
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchProducts();
+  }, []);
 
-  fetchProducts();
-}, []);
+  // Loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex min-h-[400px] items-center justify-center">
+            <div className="text-center">
+              <div className="mx-auto mb-5 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-black"></div>
+
+              <p className="text-lg font-medium text-gray-600">
+                Loading products...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex min-h-[400px] items-center justify-center">
+            <div className="max-w-md rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+              <div className="mb-4 text-4xl">⚠️</div>
+
+              <h2 className="mb-2 text-xl font-bold text-red-700">
+                Something went wrong
+              </h2>
+
+              <p className="text-red-600">{error}</p>
+
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-6 rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <section className="bg-black text-white">
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <p className="mb-3 text-sm uppercase tracking-[0.3em] text-gray-400">
-            Shoe Store
+      {/* ================= HEADER ================= */}
+
+      <section className="border-b border-gray-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
+            Our Collection
           </p>
 
-          <h1 className="text-4xl font-bold md:text-5xl">All Products</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
+            All Products
+          </h1>
 
-          <p className="mt-4 max-w-2xl text-gray-400">
-            Discover our latest collection of premium shoes, sneakers and sports
-            footwear.
+          <p className="mt-4 max-w-2xl text-gray-500">
+            Explore our latest collection of premium shoes designed for comfort,
+            performance and style.
           </p>
         </div>
       </section>
 
-      {/* Main */}
-      <div className="mx-auto max-w-7xl px-6 py-10">
-        {/* Top Bar */}
-        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Shoes Collection
-            </h2>
+      {/* ================= PRODUCTS ================= */}
 
-            <p className="mt-1 text-sm text-gray-500">
-              {products.length} products available
-            </p>
-          </div>
+      <section className="mx-auto max-w-7xl px-6 py-12">
+        {/* Product Count */}
 
-          {/* Sort */}
-          <select className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-black">
-            <option>Sort by</option>
-            <option>Newest</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-          </select>
+        <div className="mb-8 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            {products.length} {products.length === 1 ? "Product" : "Products"}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {/* Sidebar */}
-          <aside className="rounded-xl border border-gray-200 bg-white p-6">
-            <h3 className="mb-5 text-lg font-semibold">Filters</h3>
+        {/* No Products */}
 
-            {/* Search */}
-            <div className="mb-6">
-              <label className="mb-2 block text-sm font-medium">Search</label>
+        {products.length === 0 ? (
+          <div className="rounded-2xl border border-gray-200 bg-white py-20 text-center">
+            <div className="mb-4 text-5xl">👟</div>
 
-              <input
-                type="text"
-                placeholder="Search shoes..."
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black"
-              />
-            </div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              No Products Found
+            </h2>
 
-            {/* Category */}
-            <div className="mb-6">
-              <h4 className="mb-3 text-sm font-semibold">Category</h4>
+            <p className="mt-2 text-gray-500">
+              There are currently no products available.
+            </p>
+          </div>
+        ) : (
+          /* Product Grid */
 
-              <div className="space-y-3 text-sm text-gray-600">
-                <label className="flex items-center gap-3">
-                  <input type="checkbox" />
-                  Running
-                </label>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => {
+              const hasDiscount =
+                product.discountPrice &&
+                Number(product.discountPrice) < Number(product.price);
 
-                <label className="flex items-center gap-3">
-                  <input type="checkbox" />
-                  Sneakers
-                </label>
+              const displayPrice = hasDiscount
+                ? product.discountPrice
+                : product.price;
 
-                <label className="flex items-center gap-3">
-                  <input type="checkbox" />
-                  Sports
-                </label>
+              const image =
+                product.images?.[0] ||
+                "https://via.placeholder.com/600x600?text=No+Image";
 
-                <label className="flex items-center gap-3">
-                  <input type="checkbox" />
-                  Casual
-                </label>
-              </div>
-            </div>
-
-            {/* Price */}
-            <div>
-              <h4 className="mb-3 text-sm font-semibold">Price Range</h4>
-
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  className="w-1/2 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
-
-                <input
-                  type="number"
-                  placeholder="Max"
-                  className="w-1/2 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
-              </div>
-            </div>
-          </aside>
-
-          {/* Products */}
-          <main className="lg:col-span-3">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {products.map((product) => (
+              return (
                 <div
                   key={product._id}
-                  className="group overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
+                  className="group overflow-hidden rounded-2xl border border-gray-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
-                  {/* Image */}
-                  <div className="relative h-64 overflow-hidden bg-gray-100">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
+                  {/* ================= IMAGE ================= */}
 
-                    {/* Discount */}
-                    <span className="absolute left-3 top-3 rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">
-                      SALE
-                    </span>
-                  </div>
+                  <Link to={`/products/${product._id}`}>
+                    <div className="relative h-72 overflow-hidden bg-gray-100">
+                      <img
+                        src={image}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
 
-                  {/* Content */}
+                      {/* Sale Badge */}
+
+                      {hasDiscount && (
+                        <span className="absolute left-4 top-4 rounded-full bg-black px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
+                          Sale
+                        </span>
+                      )}
+
+                      {/* Featured Badge */}
+
+                      {product.isFeatured && (
+                        <span className="absolute right-4 top-4 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 shadow">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+
+                  {/* ================= CONTENT ================= */}
+
                   <div className="p-5">
-                    <p className="text-xs uppercase tracking-wider text-gray-400">
+                    {/* Brand */}
+
+                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-400">
                       {product.brand}
                     </p>
 
-                    <h3 className="mt-2 text-lg font-semibold text-gray-900">
-                      {product.name}
-                    </h3>
+                    {/* Name */}
 
-                    <div className="mt-3 flex items-center gap-3">
-                      <span className="text-lg font-bold text-gray-900">
-                        ₹{product.discountPrice}
+                    <Link to={`/products/${product._id}`}>
+                      <h2 className="mt-2 line-clamp-1 text-lg font-bold text-gray-900 transition hover:text-gray-600">
+                        {product.name}
+                      </h2>
+                    </Link>
+
+                    {/* Description */}
+
+                    {product.description && (
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500">
+                        {product.description}
+                      </p>
+                    )}
+
+                    {/* Price */}
+
+                    <div className="mt-4 flex items-center gap-3">
+                      <span className="text-xl font-bold text-gray-900">
+                        ₹{displayPrice}
                       </span>
 
-                      <span className="text-sm text-gray-400 line-through">
-                        ₹{product.price}
-                      </span>
+                      {hasDiscount && (
+                        <span className="text-sm text-gray-400 line-through">
+                          ₹{product.price}
+                        </span>
+                      )}
                     </div>
+
+                    {/* Stock */}
+
+                    <div className="mt-3">
+                      {Number(product.stock) > 0 ? (
+                        <span className="text-xs font-medium text-green-600">
+                          In Stock
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium text-red-600">
+                          Out of Stock
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Button */}
 
                     <Link
                       to={`/products/${product._id}`}
-                      className="mt-5 block w-full rounded-lg bg-black py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
+                      className="mt-5 block w-full rounded-xl bg-black px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-gray-800"
                     >
                       View Product
                     </Link>
                   </div>
                 </div>
-              ))}
-            </div>
-          </main>
-        </div>
-      </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

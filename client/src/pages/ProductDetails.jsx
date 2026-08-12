@@ -1,147 +1,328 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import api from "../services/api";
 
-function ProductDetails() {
+const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const {
+    addToCart,
+  } = useCart();
 
   const [product, setProduct] = useState(null);
+  const [selectedSize, setSelectedSize] =
+    useState("");
+
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
 
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
-  const [quantity, setQuantity] = useState(1);
-
-  const { addToCart } = useCart();
-
+  // =================================
+  // FETCH PRODUCT
+  // =================================
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await api.get(`/products/${id}`);
+        setLoading(true);
+        setError("");
 
-        setProduct(response.data.product);
+        const response = await fetch(
+          `http://localhost:5000/api/products/${id}`
+        );
+
+        const result = await response.json();
+
+        console.log(
+          "PRODUCT DETAILS RESPONSE:",
+          result
+        );
+
+        if (!response.ok || !result.success) {
+          setError(
+            result.message ||
+              "Failed to fetch product"
+          );
+
+          return;
+        }
+
+        setProduct(
+          result.product || result.data
+        );
       } catch (error) {
-        console.error(error);
+        console.error(
+          "FETCH PRODUCT ERROR:",
+          error
+        );
 
-        setError("Product not found");
+        setError("Failed to fetch product");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    if (id) {
+      fetchProduct();
+    }
   }, [id]);
 
+  // =================================
+  // ADD TO CART
+  // =================================
+  const handleAddToCart = async () => {
+    try {
+      if (!product) {
+        return;
+      }
+
+      if (!selectedSize) {
+        alert("Please select a size");
+        return;
+      }
+
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        alert("Please login first");
+        navigate("/login");
+        return;
+      }
+
+      setAdding(true);
+
+      const result = await addToCart(
+        product._id,
+        selectedSize,
+        1
+      );
+
+      console.log(
+        "ADD TO CART RESULT:",
+        result
+      );
+
+      if (!result.success) {
+        alert(
+          result.message ||
+            "Failed to add product"
+        );
+
+        return;
+      }
+
+      alert("Product added to cart successfully!");
+
+    } catch (error) {
+      console.error(
+        "HANDLE ADD TO CART ERROR:",
+        error
+      );
+
+      alert("Failed to add product to cart");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  // =================================
+  // LOADING
+  // =================================
   if (loading) {
-    return <h1>Loading...</h1>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2>Loading product...</h2>
+      </div>
+    );
   }
 
+  // =================================
+  // ERROR
+  // =================================
   if (error) {
-    return <h1>{error}</h1>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div>
+          <h2>{error}</h2>
+
+          <button
+            onClick={() => navigate("/products")}
+          >
+            Back to Products
+          </button>
+        </div>
+      </div>
+    );
   }
 
+  // =================================
+  // PRODUCT NOT FOUND
+  // =================================
   if (!product) {
-    return <h1>Product not found</h1>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2>Product not found</h2>
+      </div>
+    );
   }
 
   return (
-    <div>
-      {/* Image */}
-      <div>
-        {product.images?.length > 0 ? (
-          <img src={product.images[0]} alt={product.name} />
-        ) : (
-          <div>No Image Available</div>
-        )}
+    <div className="min-h-screen bg-gray-50 px-6 py-10">
+
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow p-8">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+
+          {/* ================= IMAGE ================= */}
+
+          <div>
+            {product.images &&
+            product.images.length > 0 ? (
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className="w-full h-[500px] object-cover rounded-xl"
+              />
+            ) : (
+              <div className="w-full h-[500px] bg-gray-200 rounded-xl flex items-center justify-center">
+                No Image
+              </div>
+            )}
+          </div>
+
+          {/* ================= DETAILS ================= */}
+
+          <div>
+
+            <p className="text-sm text-gray-500 uppercase">
+              {product.brand}
+            </p>
+
+            <h1 className="text-3xl font-bold mt-2">
+              {product.name}
+            </h1>
+
+            <p className="text-gray-600 mt-5 leading-7">
+              {product.description}
+            </p>
+
+            {/* PRICE */}
+
+            <div className="mt-6">
+
+              {product.discountPrice ? (
+                <div className="flex items-center gap-4">
+
+                  <span className="text-3xl font-bold text-black">
+                    ₹{product.discountPrice}
+                  </span>
+
+                  <span className="text-lg text-gray-400 line-through">
+                    ₹{product.price}
+                  </span>
+
+                </div>
+              ) : (
+                <span className="text-3xl font-bold">
+                  ₹{product.price}
+                </span>
+              )}
+
+            </div>
+
+            {/* ================= SIZE ================= */}
+
+            <div className="mt-8">
+
+              <h3 className="font-semibold mb-3">
+                Select Size
+              </h3>
+
+              <div className="flex flex-wrap gap-3">
+
+                {product.sizes?.map(
+                  (size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() =>
+                        setSelectedSize(size)
+                      }
+                      className={`px-5 py-3 border rounded-lg font-medium transition ${
+                        selectedSize === size
+                          ? "bg-black text-white border-black"
+                          : "bg-white text-black border-gray-300 hover:border-black"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  )
+                )}
+
+              </div>
+
+            </div>
+
+            {/* ================= STOCK ================= */}
+
+            <div className="mt-6">
+
+              {product.stock > 0 ? (
+                <p className="text-green-600 font-medium">
+                  In Stock ({product.stock})
+                </p>
+              ) : (
+                <p className="text-red-600 font-medium">
+                  Out of Stock
+                </p>
+              )}
+
+            </div>
+
+            {/* ================= ADD TO CART ================= */}
+
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={
+                adding ||
+                product.stock <= 0
+              }
+              className="w-full mt-8 bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 disabled:bg-gray-400 transition"
+            >
+              {adding
+                ? "Adding..."
+                : "Add to Cart"}
+            </button>
+
+            {/* ================= BUY NOW ================= */}
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!selectedSize) {
+                  alert("Please select a size");
+                  return;
+                }
+
+                alert(
+                  "Buy Now functionality will be added next."
+                );
+              }}
+              className="w-full mt-3 border border-black py-4 rounded-xl font-semibold hover:bg-black hover:text-white transition"
+            >
+              Buy Now
+            </button>
+
+          </div>
+
+        </div>
+
       </div>
 
-      {/* Details */}
-      <div>
-        <p>{product.brand}</p>
-
-        <h1>{product.name}</h1>
-
-        <p>{product.description}</p>
-
-        <div>
-          {product.discountPrice ? (
-            <>
-              <span>₹{product.discountPrice}</span>
-
-              <span>₹{product.price}</span>
-            </>
-          ) : (
-            <span>₹{product.price}</span>
-          )}
-        </div>
-
-        {/* Size */}
-        <div>
-          <h3>Select Size</h3>
-
-          {product.sizes.map((size) => (
-            <button key={size} onClick={() => setSelectedSize(size)}>
-              {size}
-            </button>
-          ))}
-        </div>
-
-        {/* Color */}
-        <div>
-          <h3>Select Color</h3>
-
-          {product.colors.map((color) => (
-            <button key={color} onClick={() => setSelectedColor(color)}>
-              {color}
-            </button>
-          ))}
-        </div>
-
-        {/* Quantity */}
-        <div>
-          <h3>Quantity</h3>
-
-          <button onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}>
-            -
-          </button>
-
-          <span>{quantity}</span>
-
-          <button
-            onClick={() =>
-              setQuantity((prev) => Math.min(product.stock, prev + 1))
-            }
-          >
-            +
-          </button>
-        </div>
-
-        {/* Stock */}
-        <p>
-          {product.stock > 0
-            ? `${product.stock} items available`
-            : "Out of stock"}
-        </p>
-
-        <button
-          disabled={!selectedSize}
-          onClick={async () => {
-            const success = await addToCart(product._id, selectedSize, 1);
-
-            if (success) {
-              alert("Product added to cart");
-            } else {
-              alert("Failed to add product");
-            }
-          }}
-        >
-          Add to Cart
-        </button>
-      </div>
     </div>
   );
-}
+};
 
 export default ProductDetails;
