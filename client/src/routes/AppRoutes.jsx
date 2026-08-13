@@ -39,6 +39,7 @@ import AdminEditProduct from "../pages/AdminEditProduct";
 import AdminOrders from "../pages/AdminOrders";
 import AdminUsers from "../pages/AdminUsers";
 import AdminOrderDetails from "../pages/AdminOrderDetails";
+import OrderDetails from "../pages/OrderDetails";
 
 
 const AppRoutes = () => {
@@ -196,6 +197,11 @@ const AppRoutes = () => {
       <Profile />
     </ProtectedRoute>
   }
+/>
+
+<Route
+  path="/orders/:id"
+  element={<OrderDetails />}
 />
 
     </Routes>

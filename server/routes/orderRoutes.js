@@ -3,6 +3,7 @@ import express from "express";
 import {
   createOrder,
   getMyOrders,
+  getOrderById,
   getAllOrders,
   updateOrderStatus,
 } from "../controllers/orderController.js";
@@ -11,48 +12,51 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// ==============================
-// USER ORDERS
-// ==============================
+// ===============================
+// USER ROUTES
+// ===============================
 
-// Create new order
+// Create Order
 router.post(
   "/create",
   authMiddleware,
   createOrder
 );
 
-// Get logged-in user's orders
-router.get(
-  "/",
-  authMiddleware,
-  getMyOrders
-);
-
-// Optional alternative endpoint
+// Get My Orders
 router.get(
   "/my-orders",
   authMiddleware,
   getMyOrders
 );
 
+// ===============================
+// ADMIN ROUTES
+// ===============================
 
-// ==============================
-// ADMIN ORDERS
-// ==============================
-
-// Get all orders
+// Get All Orders
 router.get(
   "/admin",
   authMiddleware,
   getAllOrders
 );
 
-// Update order status
+// Update Order Status
 router.put(
   "/admin/:id/status",
   authMiddleware,
   updateOrderStatus
+);
+
+// ===============================
+// SINGLE ORDER
+// ===============================
+
+// Get Single Order
+router.get(
+  "/:id",
+  authMiddleware,
+  getOrderById
 );
 
 export default router;
