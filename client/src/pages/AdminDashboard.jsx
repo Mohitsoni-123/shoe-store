@@ -50,8 +50,7 @@ const AdminDashboard = () => {
         console.error("ADMIN STATS ERROR:", error);
 
         setError(
-          error.response?.data?.message ||
-            "Failed to load admin statistics"
+          error.response?.data?.message || "Failed to load admin statistics",
         );
       } finally {
         setLoading(false);
@@ -114,10 +113,7 @@ const AdminDashboard = () => {
           👟 ShoeStore
         </h2>
 
-        <button
-          onClick={() => navigate("/admin")}
-          style={sidebarButton}
-        >
+        <button onClick={() => navigate("/admin")} style={sidebarButton}>
           📊 Dashboard
         </button>
 
@@ -128,24 +124,15 @@ const AdminDashboard = () => {
           👟 Products
         </button>
 
-        <button
-          onClick={() => navigate("/admin/orders")}
-          style={sidebarButton}
-        >
+        <button onClick={() => navigate("/admin/orders")} style={sidebarButton}>
           📦 Orders
         </button>
 
-        <button
-          onClick={() => navigate("/admin/users")}
-          style={sidebarButton}
-        >
+        <button onClick={() => navigate("/admin/users")} style={sidebarButton}>
           👥 Users
         </button>
 
-        <button
-          onClick={() => navigate("/products")}
-          style={sidebarButton}
-        >
+        <button onClick={() => navigate("/products")} style={sidebarButton}>
           🛍️ View Store
         </button>
 
@@ -224,8 +211,7 @@ const AdminDashboard = () => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(200px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: "20px",
           }}
         >
@@ -235,17 +221,9 @@ const AdminDashboard = () => {
             icon="👟"
           />
 
-          <StatCard
-            title="Total Users"
-            value={stats.totalUsers}
-            icon="👥"
-          />
+          <StatCard title="Total Users" value={stats.totalUsers} icon="👥" />
 
-          <StatCard
-            title="Total Orders"
-            value={stats.totalOrders}
-            icon="📦"
-          />
+          <StatCard title="Total Orders" value={stats.totalOrders} icon="📦" />
 
           <StatCard
             title="Total Revenue"
@@ -256,42 +234,24 @@ const AdminDashboard = () => {
 
         {/* ================= ORDER STATUS ================= */}
 
-        <h2 style={{ marginTop: "40px" }}>
-          Order Status
-        </h2>
+        <h2 style={{ marginTop: "40px" }}>Order Status</h2>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(160px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
             gap: "15px",
           }}
         >
-          <StatusCard
-            title="Pending"
-            value={stats.pendingOrders}
-          />
+          <StatusCard title="Pending" value={stats.pendingOrders} />
 
-          <StatusCard
-            title="Confirmed"
-            value={stats.confirmedOrders}
-          />
+          <StatusCard title="Confirmed" value={stats.confirmedOrders} />
 
-          <StatusCard
-            title="Shipped"
-            value={stats.shippedOrders}
-          />
+          <StatusCard title="Shipped" value={stats.shippedOrders} />
 
-          <StatusCard
-            title="Delivered"
-            value={stats.deliveredOrders}
-          />
+          <StatusCard title="Delivered" value={stats.deliveredOrders} />
 
-          <StatusCard
-            title="Cancelled"
-            value={stats.cancelledOrders}
-          />
+          <StatusCard title="Cancelled" value={stats.cancelledOrders} />
         </div>
 
         {/* ================= RECENT ORDERS ================= */}
@@ -338,8 +298,7 @@ const AdminDashboard = () => {
               background: "white",
               borderRadius: "10px",
               overflowX: "auto",
-              boxShadow:
-                "0 2px 8px rgba(0,0,0,0.05)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
           >
             <table
@@ -368,37 +327,23 @@ const AdminDashboard = () => {
               <tbody>
                 {recentOrders.map((order) => (
                   <tr key={order._id}>
-                    <td style={tableCell}>
-                      #{order._id?.slice(-6)}
-                    </td>
+                    <td style={tableCell}>#{order._id?.slice(-6)}</td>
 
                     <td style={tableCell}>
-                      <strong>
-                        {order.user?.name || "Unknown"}
-                      </strong>
+                      <strong>{order.user?.name || "Unknown"}</strong>
                       <br />
-                      <small>
-                        {order.user?.email || "N/A"}
-                      </small>
+                      <small>{order.user?.email || "N/A"}</small>
                     </td>
 
-                    <td style={tableCell}>
-                      ₹{order.totalAmount || 0}
-                    </td>
+                    <td style={tableCell}>₹{order.totalAmount || 0}</td>
 
                     <td style={tableCell}>
                       <span
                         style={{
                           padding: "5px 10px",
                           borderRadius: "20px",
-                          background:
-                            getStatusBackground(
-                              order.status
-                            ),
-                          color:
-                            getStatusColor(
-                              order.status
-                            ),
+                          background: getStatusBackground(order.status),
+                          color: getStatusColor(order.status),
                           fontSize: "13px",
                           fontWeight: "bold",
                         }}
@@ -409,19 +354,13 @@ const AdminDashboard = () => {
 
                     <td style={tableCell}>
                       {order.createdAt
-                        ? new Date(
-                            order.createdAt
-                          ).toLocaleDateString()
+                        ? new Date(order.createdAt).toLocaleDateString()
                         : "N/A"}
                     </td>
 
                     <td style={tableCell}>
                       <button
-                        onClick={() =>
-                          navigate(
-                            `/admin/orders/${order._id}`
-                          )
-                        }
+                        onClick={() => navigate(`/admin/orders/${order._id}`)}
                         style={{
                           padding: "7px 12px",
                           background: "#2563eb",
@@ -454,8 +393,7 @@ const StatCard = ({ title, value, icon }) => {
         background: "white",
         padding: "22px",
         borderRadius: "10px",
-        boxShadow:
-          "0 2px 8px rgba(0,0,0,0.05)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
       }}
     >
       <div
@@ -476,9 +414,7 @@ const StatCard = ({ title, value, icon }) => {
         {title}
       </p>
 
-      <h2 style={{ marginTop: "8px" }}>
-        {value}
-      </h2>
+      <h2 style={{ marginTop: "8px" }}>{value}</h2>
     </div>
   );
 };
@@ -490,8 +426,7 @@ const StatusCard = ({ title, value }) => {
         background: "white",
         padding: "18px",
         borderRadius: "10px",
-        boxShadow:
-          "0 2px 8px rgba(0,0,0,0.05)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
       }}
     >
       <p
@@ -503,9 +438,7 @@ const StatusCard = ({ title, value }) => {
         {title}
       </p>
 
-      <h2 style={{ margin: "8px 0 0" }}>
-        {value}
-      </h2>
+      <h2 style={{ margin: "8px 0 0" }}>{value}</h2>
     </div>
   );
 };

@@ -3,17 +3,29 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 
 const AdminOrderDetails = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [updating, setUpdating] = useState(false);
+
+  const statuses = [
+    "Pending",
+    "Confirmed",
+    "Shipped",
+    "Delivered",
+    "Cancelled",
+  ];
 
   // =========================
-  // FETCH ORDER DETAILS
+  // FETCH ORDER
   // =========================
+
+  useEffect(() => {
+    fetchOrder();
+  }, [id]);
 
   const fetchOrder = async () => {
     try {
@@ -22,56 +34,68 @@ const AdminOrderDetails = () => {
 
       const response = await api.get(`/admin/orders/${id}`);
 
-      console.log("ORDER DETAILS RESPONSE:", response.data);
+      console.log("ADMIN ORDER DETAILS:", response.data);
 
-      if (response.data.success) {
-        setOrder(response.data.order);
-      } else {
-        setError(response.data.message || "Failed to load order details");
-      }
+      setOrder(response.data.order);
     } catch (error) {
-      console.error("GET ORDER DETAILS ERROR:", error);
+      console.error("ADMIN ORDER DETAILS ERROR:", error);
 
-      setError(error.response?.data?.message || "Failed to load order details");
+      setError(error.response?.data?.message || "Failed to load order");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchOrder();
-  }, [id]);
-
   // =========================
-  // UPDATE ORDER STATUS
+  // UPDATE STATUS
   // =========================
 
-  const handleStatusChange = async (newStatus) => {
+  const updateStatus = async (status) => {
     try {
-      setUpdatingStatus(true);
+      setUpdating(true);
+      setError("");
 
       const response = await api.put(`/admin/orders/${id}/status`, {
-        status: newStatus,
+        status,
       });
 
-      console.log("UPDATE ORDER STATUS RESPONSE:", response.data);
+      console.log("ORDER STATUS UPDATED:", response.data);
 
-      if (response.data.success) {
-        setOrder((prevOrder) => ({
-          ...prevOrder,
-          status: newStatus,
-        }));
-
-        alert("Order status updated successfully");
-      } else {
-        alert(response.data.message || "Failed to update order status");
-      }
+      setOrder(response.data.order);
     } catch (error) {
-      console.error("UPDATE ORDER STATUS ERROR:", error);
+      console.error("STATUS UPDATE ERROR:", error);
 
-      alert(error.response?.data?.message || "Failed to update order status");
+      setError(
+        error.response?.data?.message || "Failed to update order status",
+      );
     } finally {
-      setUpdatingStatus(false);
+      setUpdating(false);
+    }
+  };
+
+  // =========================
+  // STATUS COLOR
+  // =========================
+
+  const getStatusClass = (status) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "confirmed":
+        return "bg-blue-100 text-blue-700";
+
+      case "shipped":
+        return "bg-purple-100 text-purple-700";
+
+      case "delivered":
+        return "bg-green-100 text-green-700";
+
+      case "cancelled":
+        return "bg-red-100 text-red-700";
+
+      default:
+        return "bg-gray-100 text-gray-700";
     }
   };
 
@@ -81,300 +105,388 @@ const AdminOrderDetails = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: "40px" }}>
-        <h2>Loading Order Details...</h2>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto" />
+
+          <p className="mt-4 text-gray-500">Loading order...</p>
+        </div>
       </div>
     );
   }
 
   // =========================
-  // ERROR
+  // ERROR / NOT FOUND
   // =========================
 
-  if (error) {
+  if (error || !order) {
     return (
-      <div style={{ padding: "40px" }}>
-        <h2 style={{ color: "red" }}>{error}</h2>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+        <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center max-w-md w-full">
+          <div className="text-5xl mb-5">⚠️</div>
 
-        <button onClick={() => navigate("/admin/orders")}>
-          Back to Orders
-        </button>
+          <h2 className="text-2xl font-bold text-gray-900">Order not found</h2>
+
+          <p className="text-gray-500 mt-2">
+            {error || "Unable to find this order."}
+          </p>
+
+          <button
+            onClick={() => navigate("/admin/orders")}
+            className="mt-6 bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition"
+          >
+            Back to Orders
+          </button>
+        </div>
       </div>
     );
   }
-
-  // =========================
-  // ORDER NOT FOUND
-  // =========================
-
-  if (!order) {
-    return (
-      <div style={{ padding: "40px" }}>
-        <h2>Order not found</h2>
-
-        <button onClick={() => navigate("/admin/orders")}>
-          Back to Orders
-        </button>
-      </div>
-    );
-  }
-
-  // =========================
-  // TOTAL
-  // =========================
-
-  const totalAmount = Number(order.totalAmount || 0);
-
-  // =========================
-  // UI
-  // =========================
 
   return (
-    <div
-      style={{
-        padding: "40px",
-        maxWidth: "1100px",
-        margin: "0 auto",
-      }}
-    >
+    <div className="min-h-screen bg-gray-50">
       {/* =========================
           HEADER
       ========================= */}
 
-      <h1>Order Details</h1>
+      <section className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <button
+            onClick={() => navigate("/admin/orders")}
+            className="text-sm text-gray-500 hover:text-black mb-5"
+          >
+            ← Back to Orders
+          </button>
 
-      <p>
-        <strong>Order ID:</strong> {order._id}
-      </p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+            <div>
+              <p className="text-sm uppercase tracking-[0.25em] text-gray-400">
+                Admin Panel
+              </p>
 
-      <p>
-        <strong>Order Date:</strong>{" "}
-        {order.createdAt ? new Date(order.createdAt).toLocaleString() : "N/A"}
-      </p>
+              <h1 className="text-4xl font-bold text-gray-900 mt-2">
+                Order Details
+              </h1>
+
+              <p className="text-gray-500 mt-2 break-all">Order #{order._id}</p>
+            </div>
+
+            <span
+              className={`inline-flex w-fit px-4 py-2 rounded-full text-sm font-medium ${getStatusClass(
+                order.status,
+              )}`}
+            >
+              {order.status || "Pending"}
+            </span>
+          </div>
+        </div>
+      </section>
 
       {/* =========================
-          CUSTOMER INFORMATION
+          MAIN
       ========================= */}
 
-      <div
-        style={{
-          border: "1px solid #ddd",
-          padding: "20px",
-          marginTop: "25px",
-          borderRadius: "8px",
-        }}
-      >
-        <h2>Customer Information</h2>
-
-        <p>
-          <strong>Name:</strong> {order.user?.name || "Unknown"}
-        </p>
-
-        <p>
-          <strong>Email:</strong> {order.user?.email || "N/A"}
-        </p>
-      </div>
-
-      {/* =========================
-          SHIPPING ADDRESS
-      ========================= */}
-
-      <div
-        style={{
-          border: "1px solid #ddd",
-          padding: "20px",
-          marginTop: "25px",
-          borderRadius: "8px",
-        }}
-      >
-        <h2>Shipping Address</h2>
-
-        {order.shippingAddress ? (
-          <>
-            <p>
-              <strong>Name:</strong> {order.shippingAddress.name || "N/A"}
-            </p>
-
-            <p>
-              <strong>Phone:</strong> {order.shippingAddress.phone || "N/A"}
-            </p>
-
-            <p>
-              <strong>Address:</strong> {order.shippingAddress.address || "N/A"}
-            </p>
-
-            <p>
-              <strong>City:</strong> {order.shippingAddress.city || "N/A"}
-            </p>
-
-            <p>
-              <strong>State:</strong> {order.shippingAddress.state || "N/A"}
-            </p>
-
-            <p>
-              <strong>PIN Code:</strong>{" "}
-              {order.shippingAddress.pincode || "N/A"}
-            </p>
-          </>
-        ) : (
-          <p>Shipping address not available.</p>
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6">
+            {error}
+          </div>
         )}
-      </div>
 
-      {/* =========================
-          ORDER ITEMS
-      ========================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* =========================
+              LEFT
+          ========================= */}
 
-      <div
-        style={{
-          border: "1px solid #ddd",
-          padding: "20px",
-          marginTop: "25px",
-          borderRadius: "8px",
-        }}
-      >
-        <h2>Order Items</h2>
+          <div className="lg:col-span-2 space-y-6">
+            {/* ORDER ITEMS */}
 
-        {!order.items || order.items.length === 0 ? (
-          <p>No products found.</p>
-        ) : (
-          order.items.map((item, index) => {
-            const price = Number(
-              item.price ??
-                item.product?.discountPrice ??
-                item.product?.price ??
-                0,
-            );
+            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+              <div className="p-6 border-b">
+                <h2 className="text-xl font-bold text-gray-900">
+                  Ordered Products
+                </h2>
 
-            const quantity = Number(item.quantity || 1);
+                <p className="text-sm text-gray-500 mt-1">
+                  {order.items?.length || 0} product
+                  {order.items?.length === 1 ? "" : "s"} in this order
+                </p>
+              </div>
 
-            return (
-              <div
-                key={item._id || index}
-                style={{
-                  borderBottom: "1px solid #eee",
-                  padding: "15px 0",
-                  display: "flex",
-                  gap: "20px",
-                  alignItems: "center",
-                }}
-              >
-                {/* PRODUCT IMAGE */}
+              <div className="p-6 space-y-5">
+                {order.items?.map((item, index) => {
+                  const product = item.product;
 
-                {item.product?.image && (
-                  <img
-                    src={item.product.image}
-                    alt={item.product?.name || "Product"}
-                    style={{
-                      width: "100px",
-                      height: "100px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                    }}
-                  />
-                )}
+                  const productName = item.name || product?.name || "Product";
 
-                {/* PRODUCT INFO */}
+                  const price = Number(
+                    item.price || product?.discountPrice || product?.price || 0,
+                  );
 
-                <div>
-                  <h3>{item.product?.name || "Product"}</h3>
+                  const quantity = Number(item.quantity || 1);
 
-                  <p>
-                    <strong>Size:</strong> {item.size || "N/A"}
+                  const subtotal = price * quantity;
+
+                  const image = product?.images?.[0] || product?.image;
+
+                  return (
+                    <div
+                      key={item._id || index}
+                      className="flex flex-col sm:flex-row gap-5 border-b last:border-b-0 pb-5 last:pb-0"
+                    >
+                      {/* IMAGE */}
+
+                      <div className="w-full sm:w-28 h-28 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                        {image ? (
+                          <img
+                            src={image}
+                            alt={productName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                            No Image
+                          </div>
+                        )}
+                      </div>
+
+                      {/* INFO */}
+
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {productName}
+                        </h3>
+
+                        {product?.brand && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            {product.brand}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-5 mt-4 text-sm">
+                          <span className="text-gray-500">
+                            Size:{" "}
+                            <strong className="text-gray-900">
+                              {item.size || "N/A"}
+                            </strong>
+                          </span>
+
+                          <span className="text-gray-500">
+                            Quantity:{" "}
+                            <strong className="text-gray-900">
+                              {quantity}
+                            </strong>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* PRICE */}
+
+                      <div className="sm:text-right">
+                        <p className="text-xs uppercase tracking-wide text-gray-400">
+                          Price
+                        </p>
+
+                        <p className="font-semibold text-gray-900 mt-1">
+                          ₹{price.toLocaleString("en-IN")}
+                        </p>
+
+                        <p className="text-sm text-gray-500 mt-1">
+                          Subtotal: ₹{subtotal.toLocaleString("en-IN")}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* TOTAL */}
+
+              <div className="bg-gray-50 border-t px-6 py-5">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Total Amount</span>
+
+                  <span className="text-2xl font-bold text-gray-900">
+                    ₹{Number(order.totalAmount || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* SHIPPING */}
+
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-gray-900">
+                Shipping Address
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Name
                   </p>
 
-                  <p>
-                    <strong>Quantity:</strong> {quantity}
+                  <p className="font-medium text-gray-900 mt-1">
+                    {order.shippingAddress?.name || order.user?.name || "N/A"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Phone
                   </p>
 
-                  <p>
-                    <strong>Price:</strong> ₹{price}
+                  <p className="font-medium text-gray-900 mt-1">
+                    {order.shippingAddress?.phone || "N/A"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4 md:col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Address
                   </p>
 
-                  <p>
-                    <strong>Subtotal:</strong> ₹{price * quantity}
+                  <p className="font-medium text-gray-900 mt-1">
+                    {order.shippingAddress?.address || "N/A"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    City
+                  </p>
+
+                  <p className="font-medium text-gray-900 mt-1">
+                    {order.shippingAddress?.city || "N/A"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    State
+                  </p>
+
+                  <p className="font-medium text-gray-900 mt-1">
+                    {order.shippingAddress?.state || "N/A"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Pincode
+                  </p>
+
+                  <p className="font-medium text-gray-900 mt-1">
+                    {order.shippingAddress?.pincode || "N/A"}
                   </p>
                 </div>
               </div>
-            );
-          })
-        )}
-      </div>
+            </div>
+          </div>
 
-      {/* =========================
-          ORDER SUMMARY
-      ========================= */}
+          {/* =========================
+              RIGHT
+          ========================= */}
 
-      <div
-        style={{
-          border: "1px solid #ddd",
-          padding: "20px",
-          marginTop: "25px",
-          borderRadius: "8px",
-        }}
-      >
-        <h2>Order Summary</h2>
+          <div className="space-y-6">
+            {/* CUSTOMER */}
 
-        {/* STATUS */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-gray-900">Customer</h2>
 
-        <div>
-          <strong>Status:</strong>
+              <div className="mt-5">
+                <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-2xl font-bold">
+                  {(order.user?.name || order.shippingAddress?.name || "C")
+                    .charAt(0)
+                    .toUpperCase()}
+                </div>
 
-          <select
-            value={order.status || "Pending"}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            disabled={updatingStatus}
-            style={{
-              padding: "8px",
-              marginLeft: "10px",
-            }}
-          >
-            <option value="Pending">Pending</option>
+                <h3 className="font-bold text-gray-900 mt-4">
+                  {order.user?.name ||
+                    order.shippingAddress?.name ||
+                    "Customer"}
+                </h3>
 
-            <option value="Confirmed">Confirmed</option>
+                <p className="text-sm text-gray-500 mt-1 break-all">
+                  {order.user?.email || "N/A"}
+                </p>
+              </div>
+            </div>
 
-            <option value="Shipped">Shipped</option>
+            {/* PAYMENT */}
 
-            <option value="Delivered">Delivered</option>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-gray-900">Payment</h2>
 
-            <option value="Cancelled">Cancelled</option>
-          </select>
+              <div className="space-y-4 mt-5">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Method
+                  </p>
 
-          {updatingStatus && (
-            <span
-              style={{
-                marginLeft: "10px",
-              }}
-            >
-              Updating...
-            </span>
-          )}
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {order.paymentMethod || "COD"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Payment Status
+                  </p>
+
+                  <p className="font-semibold text-gray-900 mt-1 capitalize">
+                    {order.paymentStatus || "Pending"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Order Date
+                  </p>
+
+                  <p className="font-semibold text-gray-900 mt-1">
+                    {order.createdAt
+                      ? new Date(order.createdAt).toLocaleString("en-IN")
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* UPDATE STATUS */}
+
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-gray-900">Update Order</h2>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Change the current order status.
+              </p>
+
+              <div className="space-y-2 mt-5">
+                {statuses.map((status) => (
+                  <button
+                    key={status}
+                    disabled={updating}
+                    onClick={() => updateStatus(status)}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition ${
+                      order.status === status
+                        ? "border-black bg-black text-white"
+                        : "border-gray-200 hover:border-black"
+                    } disabled:opacity-50`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+
+              {updating && (
+                <p className="text-sm text-gray-500 mt-4">
+                  Updating order status...
+                </p>
+              )}
+            </div>
+          </div>
         </div>
-
-        {/* TOTAL */}
-
-        <h2 style={{ marginTop: "20px" }}>Total Amount: ₹{totalAmount}</h2>
-      </div>
-
-      {/* =========================
-          BUTTONS
-      ========================= */}
-
-      <div
-        style={{
-          marginTop: "30px",
-          display: "flex",
-          gap: "10px",
-        }}
-      >
-        <button type="button" onClick={() => navigate("/admin/orders")}>
-          Back to Orders
-        </button>
-
-        <button type="button" onClick={() => navigate("/admin")}>
-          Admin Dashboard
-        </button>
-      </div>
+      </main>
     </div>
   );
 };

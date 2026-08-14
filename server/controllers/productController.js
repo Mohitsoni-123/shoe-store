@@ -44,9 +44,7 @@ export const createProduct = async (req, res) => {
       for (const file of req.files) {
         const uploadResult = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: "shoe-store/products",
-            },
+            { folder: "shoe-store/products" },
             (error, result) => {
               if (error) {
                 reject(error);
@@ -70,14 +68,8 @@ export const createProduct = async (req, res) => {
       price,
       discountPrice,
       category,
-      sizes:
-        typeof sizes === "string"
-          ? JSON.parse(sizes)
-          : sizes,
-      colors:
-        typeof colors === "string"
-          ? JSON.parse(colors)
-          : colors,
+      sizes: typeof sizes === "string" ? JSON.parse(sizes) : sizes,
+      colors: typeof colors === "string" ? JSON.parse(colors) : colors,
       images: imageUrls,
       stock,
       isFeatured,
@@ -104,80 +96,31 @@ export const createProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const {
-      search,
-      category,
-      brand,
-      minPrice,
-      maxPrice,
-      sort,
-    } = req.query;
+    const { search, category, brand, minPrice, maxPrice, sort } = req.query;
 
     const filter = {};
 
-    // Search
     if (search) {
       filter.$or = [
-        {
-          name: {
-            $regex: search,
-            $options: "i",
-          },
-        },
-        {
-          brand: {
-            $regex: search,
-            $options: "i",
-          },
-        },
+        { name: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
       ];
     }
 
-    // Category
-    if (category) {
-      filter.category = category;
-    }
+    if (category) filter.category = category;
+    if (brand) filter.brand = brand;
 
-    // Brand
-    if (brand) {
-      filter.brand = brand;
-    }
-
-    // Price
     if (minPrice || maxPrice) {
       filter.price = {};
-
-      if (minPrice) {
-        filter.price.$gte = Number(minPrice);
-      }
-
-      if (maxPrice) {
-        filter.price.$lte = Number(maxPrice);
-      }
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    // Sorting
-    let sortOption = {
-      createdAt: -1,
-    };
+    let sortOption = { createdAt: -1 };
 
-    if (sort === "price_asc") {
-      sortOption = {
-        price: 1,
-      };
-    }
-
-    if (sort === "price_desc") {
-      sortOption = {
-        price: -1,
-      };
-    }
-
-    if (sort === "newest") {
-      sortOption = {
-        createdAt: -1,
-      };
-    }
+    if (sort === "price_asc") sortOption = { price: 1 };
+    if (sort === "price_desc") sortOption = { price: -1 };
+    if (sort === "newest") sortOption = { createdAt: -1 };
 
     const products = await Product.find(filter).sort(sortOption);
 
@@ -232,39 +175,19 @@ export const getProductById = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const {
-      name,
-      brand,
-      description,
-      price,
-      discountPrice,
-      category,
-      sizes,
-      colors,
-      stock,
-      isFeatured,
+      name, brand, description, price, discountPrice,
+      category, sizes, colors, stock, isFeatured,
     } = req.body;
 
     const updateData = {
-      name,
-      brand,
-      description,
-      price,
-      discountPrice,
-      category,
-      sizes,
-      colors,
-      stock,
-      isFeatured,
+      name, brand, description, price, discountPrice,
+      category, sizes, colors, stock, isFeatured,
     };
 
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!product) {
       return res.status(404).json({
@@ -294,9 +217,7 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(
-      req.params.id
-    );
+    const product = await Product.findByIdAndDelete(req.params.id);
 
     if (!product) {
       return res.status(404).json({

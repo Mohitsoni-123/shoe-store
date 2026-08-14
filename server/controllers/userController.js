@@ -1,8 +1,5 @@
 import User from "../models/User.js";
 
-// ===============================
-// GET PROFILE
-// ===============================
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -28,14 +25,10 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// ===============================
-// UPDATE PROFILE
-// ===============================
 export const updateProfile = async (req, res) => {
   try {
     const { name, email } = req.body;
 
-    // Validation
     if (!name || !email) {
       return res.status(400).json({
         success: false,
@@ -43,7 +36,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Find user
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -53,7 +45,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Check if email is already used by another user
     const existingUser = await User.findOne({
       email,
       _id: { $ne: req.user.id },
@@ -66,13 +57,11 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Update data
     user.name = name;
     user.email = email;
 
     await user.save();
 
-    // Don't send password
     const updatedUser = await User.findById(req.user.id).select("-password");
 
     res.status(200).json({

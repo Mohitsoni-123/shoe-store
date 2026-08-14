@@ -17,34 +17,13 @@ const router = express.Router();
 
 router.get("/stats", authMiddleware, getAdminStats);
 
-router.get("/users", getAllUsers);
+// FIXED: was "router.get('/users', getAllUsers)" — publicly exposed all user data.
+router.get("/users", authMiddleware, adminMiddleware, getAllUsers);
 
-router.delete(
-  "/users/:id",
-  authMiddleware,
-  adminMiddleware,
-  deleteUser
-);
-router.put(
-  "/users/:id/role",
-  authMiddleware,
-  adminMiddleware,
-  updateUserRole
-);
+router.delete("/users/:id", authMiddleware, adminMiddleware, deleteUser);
+router.put("/users/:id/role", authMiddleware, adminMiddleware, updateUserRole);
 router.get("/orders", authMiddleware, adminMiddleware, getAllOrders);
-
-router.put(
-  "/orders/:id/status",
-  authMiddleware,
-  adminMiddleware,
-  updateOrderStatus,
-);
-
-router.get(
-  "/orders/:id",
-  authMiddleware,
-  adminMiddleware,
-  getOrderById
-);
+router.put("/orders/:id/status", authMiddleware, adminMiddleware, updateOrderStatus);
+router.get("/orders/:id", authMiddleware, adminMiddleware, getOrderById);
 
 export default router;

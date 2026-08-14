@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   addToCart,
   getCart,
@@ -12,15 +11,8 @@ import authMiddleware from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.post("/add", authMiddleware, addToCart);
-
 router.get("/", authMiddleware, getCart);
-
 router.put("/update", authMiddleware, updateCartItem);
-
-router.delete(
-  "/remove",
-  authMiddleware,
-  removeFromCart
-);
+router.delete("/remove", authMiddleware, removeFromCart);
 
 export default router;

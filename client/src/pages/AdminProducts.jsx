@@ -20,9 +20,7 @@ const AdminProducts = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        "http://localhost:5000/api/products"
-      );
+      const response = await fetch("http://localhost:5000/api/products");
 
       const data = await response.json();
 
@@ -49,7 +47,7 @@ const AdminProducts = () => {
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?"
+      "Are you sure you want to delete this product?",
     );
 
     if (!confirmDelete) return;
@@ -57,30 +55,23 @@ const AdminProducts = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        `http://localhost:5000/api/products/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
       if (data.success) {
         setProducts((prevProducts) =>
-          prevProducts.filter(
-            (product) => product._id !== id
-          )
+          prevProducts.filter((product) => product._id !== id),
         );
 
         alert("Product deleted successfully");
       } else {
-        alert(
-          data.message || "Failed to delete product"
-        );
+        alert(data.message || "Failed to delete product");
       }
     } catch (error) {
       console.error("DELETE PRODUCT ERROR:", error);
@@ -94,11 +85,7 @@ const AdminProducts = () => {
 
   const categories = [
     "All",
-    ...new Set(
-      products
-        .map((product) => product.category)
-        .filter(Boolean)
-    ),
+    ...new Set(products.map((product) => product.category).filter(Boolean)),
   ];
 
   // =========================
@@ -106,26 +93,15 @@ const AdminProducts = () => {
   // =========================
 
   const filteredProducts = products.filter((product) => {
-    const searchText = search
-      .toLowerCase()
-      .trim();
+    const searchText = search.toLowerCase().trim();
 
     const matchesSearch =
-      product.name
-        ?.toLowerCase()
-        .includes(searchText) ||
-      product.brand
-        ?.toLowerCase()
-        .includes(searchText);
+      product.name?.toLowerCase().includes(searchText) ||
+      product.brand?.toLowerCase().includes(searchText);
 
-    const matchesCategory =
-      category === "All" ||
-      product.category === category;
+    const matchesCategory = category === "All" || product.category === category;
 
-    return (
-      matchesSearch &&
-      matchesCategory
-    );
+    return matchesSearch && matchesCategory;
   });
 
   // =========================
@@ -147,24 +123,17 @@ const AdminProducts = () => {
 
   return (
     <div style={styles.page}>
-
       {/* ================= HEADER ================= */}
 
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>
-            Manage Products
-          </h1>
+          <h1 style={styles.title}>Manage Products</h1>
 
-          <p style={styles.subtitle}>
-            Manage your ShoeStore products
-          </p>
+          <p style={styles.subtitle}>Manage your ShoeStore products</p>
         </div>
 
         <button
-          onClick={() =>
-            navigate("/admin/products/add")
-          }
+          onClick={() => navigate("/admin/products/add")}
           style={styles.addButton}
         >
           + Add Product
@@ -173,27 +142,18 @@ const AdminProducts = () => {
 
       {/* ================= ERROR ================= */}
 
-      {error && (
-        <div style={styles.error}>
-          ⚠️ {error}
-        </div>
-      )}
+      {error && <div style={styles.error}>⚠️ {error}</div>}
 
       {/* ================= STATISTICS ================= */}
 
       <div style={styles.statsContainer}>
-
         <div style={styles.statCard}>
           <div style={styles.statIcon}>👟</div>
 
           <div>
-            <p style={styles.statTitle}>
-              Total Products
-            </p>
+            <p style={styles.statTitle}>Total Products</p>
 
-            <h2 style={styles.statValue}>
-              {products.length}
-            </h2>
+            <h2 style={styles.statValue}>{products.length}</h2>
           </div>
         </div>
 
@@ -201,13 +161,9 @@ const AdminProducts = () => {
           <div style={styles.statIcon}>🔎</div>
 
           <div>
-            <p style={styles.statTitle}>
-              Search Results
-            </p>
+            <p style={styles.statTitle}>Search Results</p>
 
-            <h2 style={styles.statValue}>
-              {filteredProducts.length}
-            </h2>
+            <h2 style={styles.statValue}>{filteredProducts.length}</h2>
           </div>
         </div>
 
@@ -215,50 +171,35 @@ const AdminProducts = () => {
           <div style={styles.statIcon}>📂</div>
 
           <div>
-            <p style={styles.statTitle}>
-              Categories
-            </p>
+            <p style={styles.statTitle}>Categories</p>
 
-            <h2 style={styles.statValue}>
-              {categories.length - 1}
-            </h2>
+            <h2 style={styles.statValue}>{categories.length - 1}</h2>
           </div>
         </div>
-
       </div>
 
       {/* ================= SEARCH ================= */}
 
       <div style={styles.filterBox}>
-
         <div style={styles.searchWrapper}>
-          <span style={styles.searchIcon}>
-            🔍
-          </span>
+          <span style={styles.searchIcon}>🔍</span>
 
           <input
             type="text"
             placeholder="Search by product name or brand..."
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
             style={styles.searchInput}
           />
         </div>
 
         <select
           value={category}
-          onChange={(e) =>
-            setCategory(e.target.value)
-          }
+          onChange={(e) => setCategory(e.target.value)}
           style={styles.select}
         >
           {categories.map((item) => (
-            <option
-              key={item}
-              value={item}
-            >
+            <option key={item} value={item}>
               {item}
             </option>
           ))}
@@ -274,247 +215,122 @@ const AdminProducts = () => {
         >
           Clear
         </button>
-
       </div>
 
       {/* ================= RESULT COUNT ================= */}
 
       <div style={styles.resultHeader}>
         <p>
-          Showing{" "}
-          <strong>
-            {filteredProducts.length}
-          </strong>{" "}
-          of{" "}
-          <strong>
-            {products.length}
-          </strong>{" "}
-          products
+          Showing <strong>{filteredProducts.length}</strong> of{" "}
+          <strong>{products.length}</strong> products
         </p>
       </div>
 
       {/* ================= PRODUCTS ================= */}
 
       {filteredProducts.length === 0 ? (
-
         <div style={styles.empty}>
-          <div style={styles.emptyIcon}>
-            📦
-          </div>
+          <div style={styles.emptyIcon}>📦</div>
 
           <h2>No Products Found</h2>
 
-          <p>
-            Try changing your search or
-            category filter.
-          </p>
+          <p>Try changing your search or category filter.</p>
         </div>
-
       ) : (
-
         <div style={styles.productGrid}>
+          {filteredProducts.map((product) => {
+            const finalPrice = product.discountPrice || product.price || 0;
 
-          {filteredProducts.map(
-            (product) => {
+            return (
+              <div key={product._id} style={styles.productCard}>
+                {/* IMAGE */}
 
-              const finalPrice =
-                product.discountPrice ||
-                product.price ||
-                0;
+                <div style={styles.imageContainer}>
+                  {product.images?.[0] ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      style={styles.productImage}
+                    />
+                  ) : (
+                    <div style={styles.noImage}>👟</div>
+                  )}
 
-              return (
-                <div
-                  key={product._id}
-                  style={styles.productCard}
-                >
-
-                  {/* IMAGE */}
-
-                  <div style={styles.imageContainer}>
-
-                    {product.images?.[0] ? (
-                      <img
-                        src={
-                          product.images[0]
-                        }
-                        alt={
-                          product.name
-                        }
-                        style={
-                          styles.productImage
-                        }
-                      />
-                    ) : (
-                      <div
-                        style={
-                          styles.noImage
-                        }
-                      >
-                        👟
-                      </div>
+                  {product.discountPrice &&
+                    product.price > product.discountPrice && (
+                      <span style={styles.discountBadge}>SALE</span>
                     )}
+                </div>
+
+                {/* PRODUCT INFO */}
+
+                <div style={styles.productInfo}>
+                  <span style={styles.categoryBadge}>
+                    {product.category || "General"}
+                  </span>
+
+                  <h2 style={styles.productName}>{product.name}</h2>
+
+                  <p style={styles.brand}>{product.brand || "Unknown Brand"}</p>
+
+                  {/* PRICE */}
+
+                  <div style={styles.priceRow}>
+                    <strong style={styles.price}>₹{finalPrice}</strong>
 
                     {product.discountPrice &&
-                      product.price >
-                        product.discountPrice && (
-                        <span
-                          style={
-                            styles.discountBadge
-                          }
-                        >
-                          SALE
-                        </span>
+                      product.price > product.discountPrice && (
+                        <span style={styles.oldPrice}>₹{product.price}</span>
                       )}
-
                   </div>
 
-                  {/* PRODUCT INFO */}
+                  {/* STOCK */}
 
-                  <div style={styles.productInfo}>
+                  <div style={styles.stockRow}>
+                    <span>Stock</span>
 
-                    <span
-                      style={
-                        styles.categoryBadge
-                      }
+                    <strong
+                      style={{
+                        color: product.stock > 0 ? "#16a34a" : "#dc2626",
+                      }}
                     >
-                      {product.category ||
-                        "General"}
-                    </span>
-
-                    <h2
-                      style={
-                        styles.productName
-                      }
-                    >
-                      {product.name}
-                    </h2>
-
-                    <p
-                      style={
-                        styles.brand
-                      }
-                    >
-                      {product.brand ||
-                        "Unknown Brand"}
-                    </p>
-
-                    {/* PRICE */}
-
-                    <div
-                      style={
-                        styles.priceRow
-                      }
-                    >
-
-                      <strong
-                        style={
-                          styles.price
-                        }
-                      >
-                        ₹{finalPrice}
-                      </strong>
-
-                      {product.discountPrice &&
-                        product.price >
-                          product.discountPrice && (
-                          <span
-                            style={
-                              styles.oldPrice
-                            }
-                          >
-                            ₹
-                            {
-                              product.price
-                            }
-                          </span>
-                        )}
-
-                    </div>
-
-                    {/* STOCK */}
-
-                    <div
-                      style={
-                        styles.stockRow
-                      }
-                    >
-
-                      <span>
-                        Stock
-                      </span>
-
-                      <strong
-                        style={{
-                          color:
-                            product.stock > 0
-                              ? "#16a34a"
-                              : "#dc2626",
-                        }}
-                      >
-                        {product.stock || 0}
-                      </strong>
-
-                    </div>
-
-                    {/* ACTIONS */}
-
-                    <div
-                      style={
-                        styles.actions
-                      }
-                    >
-
-                      <button
-                        onClick={() =>
-                          navigate(
-                            `/admin/products/edit/${product._id}`
-                          )
-                        }
-                        style={
-                          styles.editButton
-                        }
-                      >
-                        ✏️ Edit
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            product._id
-                          )
-                        }
-                        style={
-                          styles.deleteButton
-                        }
-                      >
-                        🗑️ Delete
-                      </button>
-
-                    </div>
-
+                      {product.stock || 0}
+                    </strong>
                   </div>
 
+                  {/* ACTIONS */}
+
+                  <div style={styles.actions}>
+                    <button
+                      onClick={() =>
+                        navigate(`/admin/products/edit/${product._id}`)
+                      }
+                      style={styles.editButton}
+                    >
+                      ✏️ Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      style={styles.deleteButton}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
-              );
-            }
-          )}
-
+              </div>
+            );
+          })}
         </div>
       )}
 
       {/* ================= BACK ================= */}
 
       <div style={styles.backContainer}>
-        <button
-          onClick={() =>
-            navigate("/admin")
-          }
-          style={styles.backButton}
-        >
+        <button onClick={() => navigate("/admin")} style={styles.backButton}>
           ← Back to Admin Dashboard
         </button>
       </div>
-
     </div>
   );
 };
@@ -524,7 +340,6 @@ const AdminProducts = () => {
 // =====================================================
 
 const styles = {
-
   page: {
     minHeight: "100vh",
     background: "#f5f6fa",
@@ -586,8 +401,7 @@ const styles = {
 
   statsContainer: {
     display: "grid",
-    gridTemplateColumns:
-      "repeat(auto-fit, minmax(220px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "20px",
     marginBottom: "25px",
   },
@@ -599,8 +413,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "15px",
-    boxShadow:
-      "0 2px 8px rgba(0,0,0,0.05)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
   },
 
   statIcon: {
@@ -626,8 +439,7 @@ const styles = {
     gap: "12px",
     marginBottom: "20px",
     flexWrap: "wrap",
-    boxShadow:
-      "0 2px 8px rgba(0,0,0,0.04)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
   },
 
   searchWrapper: {
@@ -673,8 +485,7 @@ const styles = {
 
   productGrid: {
     display: "grid",
-    gridTemplateColumns:
-      "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
   },
 
@@ -682,8 +493,7 @@ const styles = {
     background: "white",
     borderRadius: "12px",
     overflow: "hidden",
-    boxShadow:
-      "0 3px 10px rgba(0,0,0,0.07)",
+    boxShadow: "0 3px 10px rgba(0,0,0,0.07)",
   },
 
   imageContainer: {

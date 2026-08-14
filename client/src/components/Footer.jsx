@@ -3,159 +3,97 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-950 text-gray-300 mt-16">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-
+    <footer className="bg-black text-white mt-20">
+      <div className="max-w-7xl mx-auto px-6 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-4">
-              ShoeStore
-            </h2>
 
-            <p className="text-gray-400 leading-7 text-sm">
-              Discover premium shoes designed for comfort, style and
-              everyday performance.
+          <div className="md:col-span-2">
+            <h2 className="text-2xl font-bold">ShoeStore</h2>
+
+            <p className="text-gray-400 mt-4 max-w-md leading-relaxed">
+              Discover premium shoes designed for comfort, style and everyday
+              performance.
             </p>
 
-            <div className="flex gap-4 mt-6">
-              <a
-                href="#"
-                className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-black transition"
-              >
-                f
-              </a>
-
-              <a
-                href="#"
-                className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-black transition"
-              >
-                i
-              </a>
-
-              <a
-                href="#"
-                className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-black transition"
-              >
-                X
-              </a>
-            </div>
+            <p className="text-gray-500 text-sm mt-6">Your style. Your step.</p>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="text-white font-semibold text-lg mb-5">
-              Quick Links
-            </h3>
 
-            <div className="flex flex-col gap-3 text-sm">
+          <div>
+            <h3 className="font-semibold text-lg">Quick Links</h3>
+
+            <div className="flex flex-col gap-3 mt-5">
               <Link
                 to="/"
-                className="hover:text-white transition"
+                className="text-gray-400 hover:text-white transition"
               >
                 Home
               </Link>
 
               <Link
                 to="/products"
-                className="hover:text-white transition"
+                className="text-gray-400 hover:text-white transition"
               >
-                Shop
+                Products
               </Link>
 
               <Link
                 to="/cart"
-                className="hover:text-white transition"
+                className="text-gray-400 hover:text-white transition"
               >
                 Cart
               </Link>
 
               <Link
-                to="/products"
-                className="hover:text-white transition"
+                to="/orders"
+                className="text-gray-400 hover:text-white transition"
               >
-                All Products
+                Orders
               </Link>
             </div>
           </div>
 
-          {/* Categories */}
+          {/* Account */}
+
           <div>
-            <h3 className="text-white font-semibold text-lg mb-5">
-              Categories
-            </h3>
+            <h3 className="font-semibold text-lg">Account</h3>
 
-            <div className="flex flex-col gap-3 text-sm">
+            <div className="flex flex-col gap-3 mt-5">
               <Link
-                to="/products?category=Running"
-                className="hover:text-white transition"
+                to="/profile"
+                className="text-gray-400 hover:text-white transition"
               >
-                Running Shoes
+                My Profile
               </Link>
 
               <Link
-                to="/products?category=Casual"
-                className="hover:text-white transition"
+                to="/login"
+                className="text-gray-400 hover:text-white transition"
               >
-                Casual Shoes
+                Login
               </Link>
 
               <Link
-                to="/products?category=Sports"
-                className="hover:text-white transition"
+                to="/register"
+                className="text-gray-400 hover:text-white transition"
               >
-                Sports Shoes
+                Register
               </Link>
-
-              <Link
-                to="/products?category=Formal"
-                className="hover:text-white transition"
-              >
-                Formal Shoes
-              </Link>
-            </div>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="text-white font-semibold text-lg mb-5">
-              Contact Us
-            </h3>
-
-            <div className="space-y-4 text-sm text-gray-400">
-              <p>
-                📍 Jaipur, Rajasthan, India
-              </p>
-
-              <p>
-                📧 support@shoestore.com
-              </p>
-
-              <p>
-                📞 +91 98765 43210
-              </p>
-
-              <p>
-                🕒 Mon - Sat: 9:00 AM - 7:00 PM
-              </p>
             </div>
           </div>
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-gray-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-sm text-gray-500">
-          <p>
-            © {new Date().getFullYear()} ShoeStore. All rights reserved.
-          </p>
 
-          <div className="flex gap-5">
-            <span className="hover:text-gray-300 cursor-pointer">
-              Privacy Policy
-            </span>
+        <div className="border-t border-gray-800 mt-12 pt-6">
+          <div className="flex flex-col md:flex-row justify-between gap-4">
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} ShoeStore. All rights reserved.
+            </p>
 
-            <span className="hover:text-gray-300 cursor-pointer">
-              Terms & Conditions
-            </span>
+            <p className="text-gray-500 text-sm">Built with MERN Stack</p>
           </div>
         </div>
       </div>

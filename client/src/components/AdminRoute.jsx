@@ -1,3 +1,4 @@
+// AdminRoute.jsx
 import React from "react";
 import { Navigate } from "react-router-dom";
 
@@ -7,39 +8,20 @@ const AdminRoute = ({ children }) => {
   let user = null;
 
   try {
-    user = JSON.parse(
-      localStorage.getItem("user") || "null"
-    );
+    user = JSON.parse(localStorage.getItem("user") || "null");
   } catch (error) {
-    console.error(
-      "USER DATA PARSE ERROR:",
-      error
-    );
-
+    console.error("USER DATA PARSE ERROR:", error);
     localStorage.removeItem("user");
   }
 
-  // No token
   if (!token) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
+    return <Navigate to="/login" replace />;
   }
 
-  // Not admin
   if (user?.role !== "admin") {
-    return (
-      <Navigate
-        to="/dashboard"
-        replace
-      />
-    );
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // Admin
   return children;
 };
 

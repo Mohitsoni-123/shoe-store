@@ -14,14 +14,12 @@ function ProductCard({ product }) {
       </div>
 
       <p>{product.brand}</p>
-
       <h2>{product.name}</h2>
 
       <div>
         {product.discountPrice ? (
           <>
             <span>₹{product.discountPrice}</span>
-
             <span>₹{product.price}</span>
           </>
         ) : (
