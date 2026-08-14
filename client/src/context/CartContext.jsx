@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 
-const API_URL = "http://localhost:5000/api/cart";
+const API_URL = "https://shoe-store-backend-gm6s.onrender.com/api/cart";
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [] });

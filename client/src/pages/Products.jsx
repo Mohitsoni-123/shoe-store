@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../services/api";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -12,13 +13,13 @@ const Products = () => {
         setLoading(true);
         setError("");
 
-        const response = await fetch("http://localhost:5000/api/products");
+        const response = await api.get("/products");
 
-        const data = await response.json();
+        const data = response.data;
 
         console.log("PRODUCTS RESPONSE:", data);
 
-        if (!response.ok || !data.success) {
+        if (!data.success) {
           setError(data.message || "Failed to fetch products");
           return;
         }

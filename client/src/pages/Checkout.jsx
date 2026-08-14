@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -29,16 +30,9 @@ const Checkout = () => {
           return;
         }
 
-        const response = await fetch(
-          "http://localhost:5000/api/cart",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await api.get("/cart");
 
-        const result = await response.json();
+        const result = response.data;
 
         console.log("CHECKOUT CART RESPONSE:", result);
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const AdminProducts = () => {
   const navigate = useNavigate();
@@ -20,9 +21,9 @@ const AdminProducts = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://localhost:5000/api/products");
+      const response = await api.get("/products");
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         setProducts(data.products || []);
@@ -53,16 +54,9 @@ const AdminProducts = () => {
     if (!confirmDelete) return;
 
     try {
-      const token = localStorage.getItem("token");
+      const response = await api.delete(`/products/${id}`);
 
-      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         setProducts((prevProducts) =>

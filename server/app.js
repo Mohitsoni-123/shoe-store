@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -10,11 +11,16 @@ import adminRoutes from "./routes/adminRoutes.js";
 
 const app = express();
 
-//Middleware
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: "https://your-frontend-domain.com",
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/products", productRoutes);
@@ -22,7 +28,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
 
-//Test Route
+// Test Route
 app.get("/", (req, res) => {
   res.json({
     success: true,

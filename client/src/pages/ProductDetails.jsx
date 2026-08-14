@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-
+import api from "../services/api";
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,18 +27,15 @@ const ProductDetails = () => {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          `http://localhost:5000/api/products/${id}`
-        );
-
-        const result = await response.json();
+        const response = await api.get(`/products/${id}`);
+        const result = response.data;
 
         console.log(
           "PRODUCT DETAILS RESPONSE:",
           result
         );
 
-        if (!response.ok || !result.success) {
+        if (!result.success) {
           setError(
             result.message ||
               "Failed to fetch product"

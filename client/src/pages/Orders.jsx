@@ -18,7 +18,7 @@ const Orders = () => {
       setLoading(true);
       setError("");
 
-      const response = await api.get("/orders/my-orders");
+      const response = await api.get("/orders/my-orders")
 
       console.log("ORDERS RESPONSE:", response.data);
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const AdminAddProduct = () => {
   const navigate = useNavigate();
@@ -154,18 +155,9 @@ const AdminAddProduct = () => {
         data.append("images", image);
       });
 
-      const response = await fetch(
-        "http://localhost:5000/api/products",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: data,
-        }
-      );
+      const response = await api.post("/products", data);
 
-      const result = await response.json();
+      const result = response.data;
 
       console.log("CREATE PRODUCT RESPONSE:", result);
 
