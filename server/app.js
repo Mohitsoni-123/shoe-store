@@ -12,7 +12,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 const app = express();
 
 // Middleware
-app.use(cors({ origin: [ "http://localhost:5173", "https://your-frontend-domain.com" ], credentials: true, }));
+app.use(cors({ origin: [ "http://localhost:5173", "https://shoe-store-blue.vercel.app" ], credentials: true, }));
 
 app.use(express.json());
 app.use(cookieParser());
